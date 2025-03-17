@@ -8,12 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server:build": "tsc --outDir dist/api api/server.ts",
-    "server:start": "node dist/api/server.js",
+    "server:build": "tsc -p tsconfig.api.json",
+    "server:start": "node api/dist/server.js",
     "server:watch": "nodemon --watch api -e ts --exec \"npm run server:build && npm run server:start\""
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "express": "^4.21.2",
     "lowdb": "^7.0.1",
     "react": "^19.0.0",
@@ -24,6 +26,8 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

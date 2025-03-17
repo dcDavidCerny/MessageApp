@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "outDir": "api/dist",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["api/**/*"]
+}
+
+// {
+//     "compilerOptions": {
+//       "target": "ES2022",
+//       "lib": ["ES2023"],
+//       "module": "ES2020",
+//       "moduleResolution": "bundler",
+//       "esModuleInterop": true,
+//       "skipLibCheck": true,
+//       "outDir": "dist/api",
+//       "isolatedModules": true,
+//       "strict": true,
+//       "noUnusedLocals": false,
+//       "noUnusedParameters": false,
+//       "noFallthroughCasesInSwitch": true
+//     },
+//     "include": ["api/**/*"]
+//   }
+  

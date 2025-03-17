@@ -1,6 +1,6 @@
-import crypto from "crypto";
-import { db, saveDb } from "../db";
-import { AccessToken } from "../types";
+import * as crypto from "crypto";
+import { db, saveDb } from "../db.js";
+import { AccessToken } from "../types.js";
 
 export class AccessTokenModel {
   /**

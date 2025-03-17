@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import bcrypt from "bcrypt";
-import { db, generateId, saveDb } from "../db";
-import { User } from "../types";
-import { AccessTokenModel } from "./accessToken";
-import { ConversationModel } from "./conversation";
-import { MessageModel } from "./message";
+import { db, generateId, saveDb } from "../db.js";
+import { User } from "../types.js";
+import { AccessTokenModel } from "./accessToken.js";
+import { ConversationModel } from "./conversation.js";
+import { MessageModel } from "./message.js";
 
 export class UserModel {
   /**

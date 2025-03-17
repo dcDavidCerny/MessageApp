@@ -1,5 +1,5 @@
-import { db, generateId, saveDb } from "../db";
-import { Conversation } from "../types";
+import { db, generateId, saveDb } from "../db.js";
+import { Conversation } from "../types.js";
 
 export class ConversationModel {
   /**
