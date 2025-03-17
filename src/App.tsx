@@ -9,11 +9,11 @@ import { RegisterComponent } from "./Pages/Register";
 function App() {
   return (
     <AppWrapper>
-      <ChatPage />
-      {/* <BrowserRouter>
+      <BrowserRouter>
+        <ChatPage />
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginComponent />} />
+          <Route path="/register" element={<RegisterComponent />} />
           <Route
             path="/chat"
             element={
@@ -23,7 +23,7 @@ function App() {
             }
           />
         </Routes>
-      </BrowserRouter> */}
+      </BrowserRouter>
     </AppWrapper>
   );
 }

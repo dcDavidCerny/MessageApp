@@ -76,7 +76,7 @@ export const ConversationsColumnComponent: React.FC = () => {
 // Styled Components for styling the conversation column
 const ConversationsColumnComponentWrapper = styled.div`
   width: 300px;
-  height: 100vh;
+  /* height: 100vh; */
   background-color: #f5f5f5;
   border-right: 1px solid #ccc;
   display: flex;
