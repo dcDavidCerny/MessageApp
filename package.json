@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "devOnlyVite": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "server:build": "tsc -p tsconfig.api.json",
     "server:start": "node api/dist/server.js",
-    "server:watch": "nodemon --watch api -e ts --exec \"npm run server:build && npm run server:start\""
+    "server:watch": "nodemon --watch api -e ts --exec \"npm run server:build && npm run server:start\"",
+    "dev": "concurrently -n \"API,React\" \"npm run server:watch\" \"npm run devOnlyVite\""
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -32,6 +33,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
