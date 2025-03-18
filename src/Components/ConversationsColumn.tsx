@@ -1,69 +1,62 @@
 import styled from "@emotion/styled";
 import React, { useState } from "react";
+import { useGetRecentConversations } from "../Query/QueryHooks";
+import { ErrorComponent } from "./Error";
+import { Loading } from "./Loading";
 
-interface Conversation {
-  id: number;
-  userName: string;
-  lastMessage: string;
-  timestamp: string;
-  unreadCount: number;
-  profilePic: string;
-}
-
-const conversations: Conversation[] = [
-  {
-    id: 1,
-    userName: "John Doe",
-    lastMessage: "Hey! How's it going?",
-    timestamp: "2:30 PM",
-    unreadCount: 2,
-    profilePic: "https://randomuser.me/api/portraits/men/1.jpg",
-  },
-  {
-    id: 2,
-    userName: "Jane Smith",
-    lastMessage: "Let's catch up soon!",
-    timestamp: "12:45 PM",
-    unreadCount: 0,
-    profilePic: "https://randomuser.me/api/portraits/women/2.jpg",
-  },
-];
+const { data: conversations, isPending, error } = useGetRecentConversations();
 
 export const ConversationsColumnComponent: React.FC = () => {
-  const [selectedConversation, setSelectedConversation] = useState<
-    number | null
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
   >(null);
 
-  const handleConversationClick = (id: number) => {
-    setSelectedConversation(id);
+  const handleConversationClick = (id: string) => {
+    setSelectedConversationId(id);
   };
+
+  if (error) {
+    return <ErrorComponent error={error} />;
+  }
+
+  if (isPending) {
+    return <Loading animation="pulse" />;
+  }
 
   return (
     <ConversationsColumnComponentWrapper>
       <div className="header">Conversations</div>
       <div className="conversations-list">
         {conversations.map((conversation) => (
-          <div
+          <Conversation
             key={conversation.id}
-            className={`conversation-item ${
-              conversation.id === selectedConversation ? "selected" : ""
-            }`}
-            onClick={() => handleConversationClick(conversation.id)}
-          >
-            <img
-              src={conversation.profilePic}
-              alt={conversation.userName}
-              className="profile-pic"
-            />
-            <div className="conversation-info">
-              <div className="user-name">{conversation.userName}</div>
-              <div className="last-message">{conversation.lastMessage}</div>
-            </div>
-            <div className="timestamp">{conversation.timestamp}</div>
-            {conversation.unreadCount > 0 && (
-              <div className="unread-count">{conversation.unreadCount}</div>
-            )}
-          </div>
+            conversation={conversation}
+            onClick={() => {
+              handleConversationClick(conversation.id);
+            }}
+            selected={selectedConversationId === conversation.id}
+          />
+          // <div
+          //   key={conversation.id}
+          //   className={`conversation-item ${
+          //     conversation.id === selectedConversationId ? "selected" : ""
+          //   }`}
+          //   onClick={() => handleConversationClick(conversation.id)}
+          // >
+          //   <img
+          //     src={conversation.profilePic}
+          //     alt={conversation.}
+          //     className="profile-pic"
+          //   />
+          //   <div className="conversation-info">
+          //     <div className="user-name">{conversation.participantIds}</div>
+          //     <div className="last-message">{conversation.lastMessage}</div>
+          //   </div>
+          //   <div className="timestamp">{conversation.timestamp}</div>
+          //   {conversation.unreadCount > 0 && (
+          //     <div className="unread-count">{conversation.unreadCount}</div>
+          //   )}
+          // </div>
         ))}
       </div>
     </ConversationsColumnComponentWrapper>
