@@ -16,6 +16,7 @@ export interface User {
 export interface Conversation {
   id: string;
   participantIds: string[];
+  otherParticipants: User[];
   isGroup: boolean;
   name?: string;
   createdAt: string;

@@ -276,7 +276,7 @@ export class ConversationModel {
    */
   static async getRecentConversations(
     userId: string,
-    limit = 20
+    limit = 1000
   ): Promise<Conversation[]> {
     const userConversations = await this.findByUserId(userId);
 

@@ -13,7 +13,9 @@ export class UserModel {
    * @returns The created user object (without password) and access token
    * @throws Error if email already exists
    */
-  static async create(userData: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<{user: Omit<User, "password">, token: string}> {
+  static async create(
+    userData: Omit<User, "id" | "createdAt" | "updatedAt">
+  ): Promise<{ user: Omit<User, "password">; token: string }> {
     // Check if email is already in use
     if (await this.findByEmail(userData.email)) {
       throw new Error("Email already exists");
@@ -40,7 +42,7 @@ export class UserModel {
     const { password, ...userWithoutPassword } = newUser;
     return {
       user: userWithoutPassword,
-      token: accessToken.token
+      token: accessToken.token,
     };
   }
 
@@ -50,13 +52,27 @@ export class UserModel {
    * @returns User object without password or null if not found
    */
   static async findById(id: string): Promise<Omit<User, "password"> | null> {
-    const user = db.data.users.find(user => user.id === id);
-    
+    const user = db.data.users.find((user) => user.id === id);
+
     if (!user) return null;
-    
+
     // Return user without password
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  /**
+   * Find users by their IDs
+   * @param ids Array of user IDs
+   * @returns Array of user objects without passwords
+   */
+  static async findByIds(ids: string[]): Promise<Omit<User, "password">[]> {
+    const users = db.data.users.filter((user) => ids.includes(user.id));
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+    return usersWithoutPassword;
   }
 
   /**
@@ -65,7 +81,7 @@ export class UserModel {
    * @returns User object or null if not found
    */
   static async findByEmail(email: string): Promise<User | null> {
-    return db.data.users.find(user => user.email === email) || null;
+    return db.data.users.find((user) => user.email === email) || null;
   }
 
   /**
@@ -73,7 +89,7 @@ export class UserModel {
    * @returns Array of user objects without passwords
    */
   static async findAll(): Promise<Omit<User, "password">[]> {
-    return db.data.users.map(user => {
+    return db.data.users.map((user) => {
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
@@ -86,23 +102,23 @@ export class UserModel {
    * @returns Updated user without password or null if not found
    */
   static async update(
-    id: string, 
+    id: string,
     userData: Partial<Omit<User, "id" | "createdAt" | "updatedAt" | "password">>
   ): Promise<Omit<User, "password"> | null> {
-    const userIndex = db.data.users.findIndex(user => user.id === id);
-    
+    const userIndex = db.data.users.findIndex((user) => user.id === id);
+
     if (userIndex === -1) return null;
-    
+
     const user = db.data.users[userIndex];
     const updatedUser = {
       ...user,
       ...userData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     db.data.users[userIndex] = updatedUser;
     await saveDb();
-    
+
     const { password, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }
@@ -113,15 +129,18 @@ export class UserModel {
    * @param newPassword New password to set
    * @returns true if successful, false if user not found
    */
-  static async updatePassword(id: string, newPassword: string): Promise<boolean> {
-    const userIndex = db.data.users.findIndex(user => user.id === id);
-    
+  static async updatePassword(
+    id: string,
+    newPassword: string
+  ): Promise<boolean> {
+    const userIndex = db.data.users.findIndex((user) => user.id === id);
+
     if (userIndex === -1) return false;
-    
+
     const hashedPassword = await this.hashPassword(newPassword);
     db.data.users[userIndex].password = hashedPassword;
     db.data.users[userIndex].updatedAt = new Date();
-    
+
     await saveDb();
     return true;
   }
@@ -133,12 +152,12 @@ export class UserModel {
    */
   static async delete(id: string): Promise<boolean> {
     const initialLength = db.data.users.length;
-    db.data.users = db.data.users.filter(user => user.id !== id);
-    
+    db.data.users = db.data.users.filter((user) => user.id !== id);
+
     if (initialLength === db.data.users.length) {
       return false;
     }
-    
+
     await saveDb();
     return true;
   }
@@ -149,27 +168,30 @@ export class UserModel {
    * @param password User password
    * @returns User object without password and access token if authentication successful, null otherwise
    */
-  static async authenticate(email: string, password: string): Promise<{user: Omit<User, "password">, token: string} | null> {
+  static async authenticate(
+    email: string,
+    password: string
+  ): Promise<{ user: Omit<User, "password">; token: string } | null> {
     const user = await this.findByEmail(email);
-    
+
     if (!user) return null;
-    
+
     const passwordMatch = await bcrypt.compare(password, user.password);
-    
+
     if (!passwordMatch) return null;
-    
+
     // Update last active and status
-    const userIndex = db.data.users.findIndex(u => u.id === user.id);
+    const userIndex = db.data.users.findIndex((u) => u.id === user.id);
     db.data.users[userIndex].lastActive = new Date();
     await saveDb();
-    
+
     // Generate access token
     const accessToken = await AccessTokenModel.generateToken(user.id);
-    
+
     const { password: _, ...userWithoutPassword } = user;
-    return { 
+    return {
       user: userWithoutPassword,
-      token: accessToken.token
+      token: accessToken.token,
     };
   }
 
@@ -178,11 +200,13 @@ export class UserModel {
    * @param token Access token to verify
    * @returns User object without password if token is valid, null otherwise
    */
-  static async getUserByToken(token: string): Promise<Omit<User, "password"> | null> {
+  static async getUserByToken(
+    token: string
+  ): Promise<Omit<User, "password"> | null> {
     const userId = await AccessTokenModel.verifyToken(token);
-    
+
     if (!userId) return null;
-    
+
     return await this.findById(userId);
   }
 
@@ -209,14 +233,16 @@ export class UserModel {
    * @param searchTerm The search term to match against usernames
    * @returns Array of matching users without passwords
    */
-  static async searchUsers(searchTerm: string): Promise<Omit<User, "password">[]> {
+  static async searchUsers(
+    searchTerm: string
+  ): Promise<Omit<User, "password">[]> {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
-    
-    const matchedUsers = db.data.users.filter(user => 
+
+    const matchedUsers = db.data.users.filter((user) =>
       user.displayName.toLowerCase().includes(lowercaseSearchTerm)
     );
-    
-    return matchedUsers.map(user => {
+
+    return matchedUsers.map((user) => {
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
@@ -228,14 +254,21 @@ export class UserModel {
    * @param recipientId ID of the user receiving the request
    * @returns true if successful, false if users not found or request already sent
    */
-  static async sendFriendRequest(requesterId: string, recipientId: string): Promise<boolean> {
+  static async sendFriendRequest(
+    requesterId: string,
+    recipientId: string
+  ): Promise<boolean> {
     // Don't allow sending requests to yourself
     if (requesterId === recipientId) {
       return false;
     }
 
-    const requesterIndex = db.data.users.findIndex(user => user.id === requesterId);
-    const recipientIndex = db.data.users.findIndex(user => user.id === recipientId);
+    const requesterIndex = db.data.users.findIndex(
+      (user) => user.id === requesterId
+    );
+    const recipientIndex = db.data.users.findIndex(
+      (user) => user.id === recipientId
+    );
 
     if (requesterIndex === -1 || recipientIndex === -1) {
       return false;
@@ -247,7 +280,9 @@ export class UserModel {
     }
 
     // Check if request already exists
-    if (db.data.users[recipientIndex].friendRequestUserIds.includes(requesterId)) {
+    if (
+      db.data.users[recipientIndex].friendRequestUserIds.includes(requesterId)
+    ) {
       return false;
     }
 
@@ -264,16 +299,22 @@ export class UserModel {
    * @param requesterId ID of the user who sent the request
    * @returns true if successful, false if users not found or no request exists
    */
-  static async acceptFriendRequest(userId: string, requesterId: string): Promise<boolean> {
-    const userIndex = db.data.users.findIndex(user => user.id === userId);
-    const requesterIndex = db.data.users.findIndex(user => user.id === requesterId);
+  static async acceptFriendRequest(
+    userId: string,
+    requesterId: string
+  ): Promise<boolean> {
+    const userIndex = db.data.users.findIndex((user) => user.id === userId);
+    const requesterIndex = db.data.users.findIndex(
+      (user) => user.id === requesterId
+    );
 
     if (userIndex === -1 || requesterIndex === -1) {
       return false;
     }
 
     // Check if request exists
-    const requestIndex = db.data.users[userIndex].friendRequestUserIds.indexOf(requesterId);
+    const requestIndex =
+      db.data.users[userIndex].friendRequestUserIds.indexOf(requesterId);
     if (requestIndex === -1) {
       return false;
     }
@@ -285,7 +326,7 @@ export class UserModel {
     if (!db.data.users[userIndex].friendIds.includes(requesterId)) {
       db.data.users[userIndex].friendIds.push(requesterId);
     }
-    
+
     if (!db.data.users[requesterIndex].friendIds.includes(userId)) {
       db.data.users[requesterIndex].friendIds.push(userId);
     }
@@ -296,26 +337,29 @@ export class UserModel {
     db.data.users[requesterIndex].updatedAt = now;
 
     await saveDb();
-    
+
     // Create a conversation between the new friends
-    const conversation = await ConversationModel.createDirectConversation([requesterId, userId]);
-    
+    const conversation = await ConversationModel.createDirectConversation([
+      requesterId,
+      userId,
+    ]);
+
     // Create a message from the requester
     await MessageModel.create({
       senderId: requesterId,
       conversationId: conversation.id,
       content: "Will you be my friend?",
-      metadata: {}
+      metadata: {},
     });
-    
+
     // Create a response message from the accepter
     await MessageModel.create({
       senderId: userId,
       conversationId: conversation.id,
       content: "Of course I will <3",
-      metadata: {}
+      metadata: {},
     });
-    
+
     return true;
   }
 
@@ -325,15 +369,19 @@ export class UserModel {
    * @param requesterId ID of the user who sent the request
    * @returns true if successful, false if users not found or no request exists
    */
-  static async declineFriendRequest(userId: string, requesterId: string): Promise<boolean> {
-    const userIndex = db.data.users.findIndex(user => user.id === userId);
-    
+  static async declineFriendRequest(
+    userId: string,
+    requesterId: string
+  ): Promise<boolean> {
+    const userIndex = db.data.users.findIndex((user) => user.id === userId);
+
     if (userIndex === -1) {
       return false;
     }
 
     // Check if request exists
-    const requestIndex = db.data.users[userIndex].friendRequestUserIds.indexOf(requesterId);
+    const requestIndex =
+      db.data.users[userIndex].friendRequestUserIds.indexOf(requesterId);
     if (requestIndex === -1) {
       return false;
     }
@@ -352,25 +400,30 @@ export class UserModel {
    * @param friendId ID of the friend to remove
    * @returns true if successful, false if users not found or not friends
    */
-  static async removeFriend(userId: string, friendId: string): Promise<boolean> {
-    const userIndex = db.data.users.findIndex(user => user.id === userId);
-    const friendIndex = db.data.users.findIndex(user => user.id === friendId);
+  static async removeFriend(
+    userId: string,
+    friendId: string
+  ): Promise<boolean> {
+    const userIndex = db.data.users.findIndex((user) => user.id === userId);
+    const friendIndex = db.data.users.findIndex((user) => user.id === friendId);
 
     if (userIndex === -1 || friendIndex === -1) {
       return false;
     }
 
     // Check if they are friends
-    const friendIndexInUser = db.data.users[userIndex].friendIds.indexOf(friendId);
-    const userIndexInFriend = db.data.users[friendIndex].friendIds.indexOf(userId);
-    
+    const friendIndexInUser =
+      db.data.users[userIndex].friendIds.indexOf(friendId);
+    const userIndexInFriend =
+      db.data.users[friendIndex].friendIds.indexOf(userId);
+
     if (friendIndexInUser === -1) {
       return false;
     }
 
     // Remove from each other's friend lists
     db.data.users[userIndex].friendIds.splice(friendIndexInUser, 1);
-    
+
     if (userIndexInFriend !== -1) {
       db.data.users[friendIndex].friendIds.splice(userIndexInFriend, 1);
     }
@@ -389,16 +442,18 @@ export class UserModel {
    * @param userId User ID
    * @returns Array of friend user objects without passwords, or null if user not found
    */
-  static async getFriends(userId: string): Promise<Omit<User, "password">[] | null> {
-    const user = db.data.users.find(user => user.id === userId);
-    
+  static async getFriends(
+    userId: string
+  ): Promise<Omit<User, "password">[] | null> {
+    const user = db.data.users.find((user) => user.id === userId);
+
     if (!user) {
       return null;
     }
 
     const friends = db.data.users
-      .filter(u => user.friendIds.includes(u.id))
-      .map(friend => {
+      .filter((u) => user.friendIds.includes(u.id))
+      .map((friend) => {
         const { password, ...friendWithoutPassword } = friend;
         return friendWithoutPassword;
       });
@@ -411,16 +466,18 @@ export class UserModel {
    * @param userId User ID
    * @returns Array of requester user objects without passwords, or null if user not found
    */
-  static async getFriendRequests(userId: string): Promise<Omit<User, "password">[] | null> {
-    const user = db.data.users.find(user => user.id === userId);
-    
+  static async getFriendRequests(
+    userId: string
+  ): Promise<Omit<User, "password">[] | null> {
+    const user = db.data.users.find((user) => user.id === userId);
+
     if (!user) {
       return null;
     }
 
     const requesters = db.data.users
-      .filter(u => user.friendRequestUserIds.includes(u.id))
-      .map(requester => {
+      .filter((u) => user.friendRequestUserIds.includes(u.id))
+      .map((requester) => {
         const { password, ...requesterWithoutPassword } = requester;
         return requesterWithoutPassword;
       });
