@@ -23,6 +23,7 @@ export const authenticate = async (
     const token = req.cookies.accessToken;
 
     if (!token) {
+      console.error("No token provided");
       res.status(401).json({ error: "Authentication required" });
       return;
     }
@@ -31,6 +32,7 @@ export const authenticate = async (
 
     if (!user) {
       res.clearCookie("accessToken");
+      console.error("Invalid or expired token");
       res.status(401).json({ error: "Invalid or expired token" });
       return;
     }
@@ -40,6 +42,7 @@ export const authenticate = async (
     req.token = token;
     next();
   } catch (error) {
+    console.error("Authentication error:", error);
     res.status(500).json({ error: "Authentication error" });
   }
 };
