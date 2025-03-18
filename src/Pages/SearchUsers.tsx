@@ -1,6 +1,7 @@
-import { Loading } from "../Components/Loading";
+import styled from "@emotion/styled";
 import React, { useState } from "react";
-import styled from "styled-components";
+import { ErrorComponent } from "../Components/Error";
+import { Loading } from "../Components/Loading";
 import { useSearchUsers } from "../Query/QueryHooks";
 
 export const SearchUsersPage: React.FC = () => {
@@ -18,7 +19,6 @@ export const SearchUsersPage: React.FC = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
-  console.log(error);
   return (
     <SearchUsersWrapper>
       <h1>Search Users</h1>
@@ -30,11 +30,7 @@ export const SearchUsersPage: React.FC = () => {
           onChange={handleSearchChange}
         />
       </div>
-      {isError && (
-        <div className="error">
-          Error: {error instanceof Error ? error.message : error}
-        </div>
-      )}
+      {isError && <ErrorComponent error={error} />}
 
       {isLoading && <Loading animation="pulse" />}
 

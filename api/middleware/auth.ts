@@ -31,8 +31,7 @@ export const authenticate = async (
     const user = await UserModel.getUserByToken(token);
 
     if (!user) {
-      res.clearCookie("accessToken");
-      console.error("Invalid or expired token");
+      console.error("Invalid or expired token: " + token);
       res.status(401).json({ error: "Invalid or expired token" });
       return;
     }

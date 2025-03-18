@@ -122,7 +122,6 @@ router.get("/verify", async (req, res): Promise<void>  => {
     const user = await UserModel.getUserByToken(token);
 
     if (!user) {
-      res.clearCookie("accessToken");
       res.json({ valid: false });
       return;
     }

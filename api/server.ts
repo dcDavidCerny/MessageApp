@@ -1,7 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import { initDb } from "./db.js";
 import authRouter from "./routes/auth.js";
 import conversationRouter from "./routes/conversation.js";
 import friendRouter from "./routes/friend.js";
@@ -15,12 +14,6 @@ export const usersWithNewItems: Set<string> = new Set();
 // Initialize Express application
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Load database before starting server
-await initDb().catch((error) => {
-  console.error("Error initializing database:", error);
-  process.exit(1);
-});
 
 // Middleware
 app.use(

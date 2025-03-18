@@ -1,4 +1,3 @@
-import { writeFileSync } from "fs";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import { join } from "path";
@@ -20,27 +19,18 @@ const defaultData: DatabaseSchema = {
   accessToken: [],
 };
 
-// Configure lowdb to use JSON file adapter
-const file = join(process.cwd(), "api/db.json");
-const adapter = new JSONFile<DatabaseSchema>(file);
-const db = new Low<DatabaseSchema>(adapter, defaultData);
-
-// Initialize the database
-export const initDb = async (): Promise<void> => {
-  // Create necessary directory structure if it doesn't exist
-  try {
-    const fileData = await adapter.read();
-    if (fileData == null) {
-      // create empty JSON file
-      writeFileSync(file, JSON.stringify(defaultData));
-    }
-    console.log("Database loaded successfully");
-  } catch (error) {
-    console.log("Database file not found" + error);
-    console.log("Creating new database file");
-    await db.write();
-  }
-};
+// Configure lowdb to use JSON file
+const filePath = join(process.cwd(), "api/db.json");
+const file = new JSONFile<DatabaseSchema>(filePath);
+const db = new Low<DatabaseSchema>(file, defaultData);
+await db.read();
+if (db.data == null) {
+  db.data = defaultData;
+  await db.write();
+  console.log("Database initialized with default data");
+} else {
+  console.log("Database loaded with existing data");
+}
 
 // Write changes to the database
 export const saveDb = async (): Promise<void> => {

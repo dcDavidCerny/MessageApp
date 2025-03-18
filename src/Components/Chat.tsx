@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import styled from "styled-components";
+import styled from "@emotion/styled";
+import React, { useEffect, useRef, useState } from "react";
 
 interface Message {
   id: number;

@@ -1,5 +1,5 @@
+import styled from "@emotion/styled";
 import { BrowserRouter, Route, Routes } from "react-router";
-import styled from "styled-components";
 import "./App.css";
 import { ChatPage } from "./Pages/Chat";
 import { LoginComponent } from "./Pages/Login";

@@ -1,6 +1,6 @@
+import styled from "@emotion/styled";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import styled from "styled-components";
 import { Loading } from "../Components/Loading";
 import { useLogin } from "../Query/QueryHooks";
 

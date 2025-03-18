@@ -1,7 +1,8 @@
+import styled from "@emotion/styled";
 import { useState } from "react";
-import styled from "styled-components";
 import { ChatComponent } from "../Components/Chat";
 import { ConversationsColumnComponent } from "../Components/ConversationsColumn";
+import { ErrorComponent } from "../Components/Error";
 import { Loading } from "../Components/Loading";
 import { queryClient } from "../main";
 import { useGetCurrentUser, useUpdateCurrentUser } from "../Query/QueryHooks";
@@ -31,11 +32,7 @@ export const ChatPage = () => {
   };
 
   if (error) {
-    return (
-      <div>
-        Error: {error instanceof Error ? error.message : "Unknown error"}
-      </div>
-    );
+    return <ErrorComponent error={error} />;
   }
 
   if (isUserLoadingPending || !user) {
