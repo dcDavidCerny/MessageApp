@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import React, { useState } from "react";
 
-// Define an interface for the conversation data
 interface Conversation {
   id: number;
   userName: string;
@@ -28,7 +27,6 @@ const conversations: Conversation[] = [
     unreadCount: 0,
     profilePic: "https://randomuser.me/api/portraits/women/2.jpg",
   },
-  // Add more conversations as needed
 ];
 
 export const ConversationsColumnComponent: React.FC = () => {
@@ -38,7 +36,6 @@ export const ConversationsColumnComponent: React.FC = () => {
 
   const handleConversationClick = (id: number) => {
     setSelectedConversation(id);
-    // Logic to open the chat (e.g., navigate to ChatPage or load conversation)
   };
 
   return (
@@ -73,10 +70,8 @@ export const ConversationsColumnComponent: React.FC = () => {
   );
 };
 
-// Styled Components for styling the conversation column
 const ConversationsColumnComponentWrapper = styled.div`
   width: 300px;
-  /* height: 100vh; */
   background-color: #f5f5f5;
   border-right: 1px solid #ccc;
   display: flex;

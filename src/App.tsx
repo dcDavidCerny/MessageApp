@@ -5,6 +5,8 @@ import { ChatPage } from "./Pages/Chat";
 import { LoginComponent } from "./Pages/Login";
 import { RegisterComponent } from "./Pages/Register";
 import { SearchUsersPage } from "./Pages/SearchUsers";
+import { GetFriendRequestsPage } from "./Pages/GetFriendRequests";
+import { GetFriendsPage } from "./Pages/GetFriends";
 
 function App() {
   return (
@@ -15,6 +17,11 @@ function App() {
           <Route path="/register" element={<RegisterComponent />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/searchUsers" element={<SearchUsersPage />} />
+          <Route
+            path="/getFriendRequests"
+            element={<GetFriendRequestsPage />}
+          />
+          <Route path="/getFriends" element={<GetFriendsPage />} />
         </Routes>
       </BrowserRouter>
     </AppWrapper>

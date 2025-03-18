@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import React, { useState } from "react";
 import { ErrorComponent } from "../Components/Error";
 import { Loading } from "../Components/Loading";
-import { useSearchUsers } from "../Query/QueryHooks";
+import { useSearchUsers, useSendFriendRequest } from "../Query/QueryHooks";
 
 export const SearchUsersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,9 +16,28 @@ export const SearchUsersPage: React.FC = () => {
     enabled: searchTerm.length > 1,
   });
 
+  const {
+    mutate,
+    isPending,
+    error: sendFriendReqError,
+  } = useSendFriendRequest({
+    onSuccess: () => {
+      console.log("Friend request sent!");
+      alert("Friend request sent!");
+    },
+    // onError: (error: { message: string }) => {
+    //   alert(`Error: ${error.message}`);
+    // },
+  });
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
+
+  const handleSendFriendRequest = (userId: string) => {
+    mutate({ userId });
+  };
+
   return (
     <SearchUsersWrapper>
       <h1>Search Users</h1>
@@ -31,6 +50,7 @@ export const SearchUsersPage: React.FC = () => {
         />
       </div>
       {isError && <ErrorComponent error={error} />}
+      {sendFriendReqError && <ErrorComponent error={sendFriendReqError} />}
 
       {isLoading && <Loading animation="pulse" />}
 
@@ -39,6 +59,12 @@ export const SearchUsersPage: React.FC = () => {
           <div className="user-card" key={user.id}>
             <h3>{user.displayName}</h3>
             <p>{user.email}</p>
+            <button
+              className="sendFriendRequestBtn"
+              onClick={() => handleSendFriendRequest(user.id)}
+            >
+              {isPending ? "Sending..." : "Send friend request"}
+            </button>
           </div>
         ))}
       </div>
@@ -104,6 +130,16 @@ const SearchUsersWrapper = styled.div`
 
     p {
       color: #666;
+    }
+
+    .sendFriendRequestBtn {
+      padding: 8px 16px;
+      background-color: #0078ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
     }
   }
 `;
