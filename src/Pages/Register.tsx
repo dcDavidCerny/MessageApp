@@ -85,5 +85,9 @@ export const RegisterComponent = () => {
 const RegisterWrapper = styled.div`
   width: 50vw;
   height: 50vh;
+  margin: auto;
   background-color: #00e5fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

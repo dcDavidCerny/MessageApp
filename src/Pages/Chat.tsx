@@ -7,9 +7,12 @@ import { queryClient } from "../main";
 import { useGetCurrentUser, useUpdateCurrentUser } from "../Query/QueryHooks";
 
 export const ChatPage = () => {
-  const { data: user, isPending: isUserLoadingPending } = useGetCurrentUser({
-    refetchInterval: 1000 * 60 * 60, // refetch every hour
-    refetchOnMount: true,
+  const {
+    data: user,
+    isPending: isUserLoadingPending,
+    error,
+  } = useGetCurrentUser({
+    refetchInterval: 1000 * 60 * 60 * 0.5, // refetch every half hour
   });
   const { mutate: updateUser, isPending: updateUserPending } =
     useUpdateCurrentUser();
@@ -27,6 +30,14 @@ export const ChatPage = () => {
     );
   };
 
+  if (error) {
+    return (
+      <div>
+        Error: {error instanceof Error ? error.message : "Unknown error"}
+      </div>
+    );
+  }
+
   if (isUserLoadingPending || !user) {
     return <Loading />;
   }
@@ -35,7 +46,7 @@ export const ChatPage = () => {
       {updateUserPending && <Loading animation="pulse" />}
       <ChatPageWrapper>
         <div>
-          User <b>{user!.displayName}</b> is logged in!
+          User <b>{user.displayName}</b> is logged in!
           <br />
           <br />
           His email is {user.email}

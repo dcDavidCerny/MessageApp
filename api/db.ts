@@ -21,7 +21,7 @@ const defaultData: DatabaseSchema = {
 };
 
 // Configure lowdb to use JSON file adapter
-const file = join(process.cwd(), "api/dist/db.json");
+const file = join(process.cwd(), "api/db.json");
 const adapter = new JSONFile<DatabaseSchema>(file);
 const db = new Low<DatabaseSchema>(adapter, defaultData);
 

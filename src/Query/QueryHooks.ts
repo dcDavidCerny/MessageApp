@@ -53,9 +53,19 @@ export const useApiQuery = <TData = unknown>(
         credentials: "include",
       });
       if (!response.ok) {
-        throw new Error(
-          `API fetch error - method: GET, route: ${route}, status: ${response.status}, text: ${response.statusText}`
-        );
+        const errorText = await response.text();
+        // if response is json
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(
+          `API fetch error - method: GET, route: ${route}, status: ${response.status}, text: ${errorJson.message}`
+          );
+        } catch (e) {
+          // if response is not json
+          throw new Error(
+            `API fetch error - method: GET, route: ${route}, status: ${response.status}, text: ${errorText}`
+          );
+        }
       }
       const data = await response.json();
       return data as TData;
@@ -159,7 +169,7 @@ export const useChangePassword = (
 
 export const useSearchUsers = (
   query: string,
-  options?: UseQueryOptions<User[], Error>
+  options?: Partial< UseQueryOptions<User[], Error>>
 ) => {
   return useApiQuery<User[]>("/users/search", { query }, options);
 };
