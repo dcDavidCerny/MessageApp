@@ -57,12 +57,17 @@ router.put("/password", authenticate, async (req, res): Promise<void> => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      res.status(400).json({ error: "Both old and new passwords are required" });
+      res
+        .status(400)
+        .json({ error: "Both old and new passwords are required" });
       return;
     }
 
     // Verify old password
-    const isAuthenticated = await UserModel.authenticate(req.user.email, oldPassword);
+    const isAuthenticated = await UserModel.authenticate(
+      req.user.email,
+      oldPassword
+    );
 
     if (!isAuthenticated) {
       res.status(401).json({ error: "Invalid old password" });
@@ -89,7 +94,9 @@ router.get("/search", authenticate, async (req, res): Promise<void> => {
     const searchQuery = req.query.query as string;
 
     if (!searchQuery || searchQuery.length < 2) {
-      res.status(400).json({ error: "Search query must be at least 2 characters long" });
+      res
+        .status(400)
+        .json({ error: "Search query must be at least 2 characters long" });
       return;
     }
 
