@@ -117,7 +117,10 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
           const isCurrentUser = senderName === currentUser;
 
           return (
-            <div key={msg.id}>
+            <div
+              key={msg.id}
+              className={isCurrentUser ? "messageWrapperCurrentUser" : ""}
+            >
               {isCurrentUser ? (
                 <ContextMenu
                   messageId={msg.id}
@@ -208,10 +211,12 @@ const ChatComponentWrapper = styled.div`
   }
 
   .message-bubble-current-user {
-    /* does not apply... */
-    align-self: flex-end !important;
     background-color: #81d4fe;
     cursor: pointer;
+  }
+
+  .messageWrapperCurrentUser {
+    align-self: flex-end;
   }
 
   .sender-name {
