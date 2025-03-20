@@ -1,16 +1,13 @@
 import styled from "@emotion/styled";
 import React, { useEffect, useRef, useState } from "react";
-import { useGetMessages, useSendMessage } from "../Query/QueryHooks";
-import { useMutation } from "@tanstack/react-query";
+import {
+  useGetMessages,
+  useSendMessage,
+  useDeleteMessage,
+} from "../Query/QueryHooks";
 import { queryClient } from "../main";
 import { Conversation } from "../Query/types";
-
-interface Message {
-  id: number;
-  sender: string;
-  text: string;
-  timestamp: string;
-}
+import ContextMenu from "./ContextMemu";
 
 interface ChatComponentProps {
   conversation: Conversation;
@@ -29,7 +26,9 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentUser = "You";
 
-  const { mutate: sendMessageMutation, data } = useSendMessage();
+  const { mutate: sendMessageMutation } = useSendMessage();
+
+  const { mutate: deleteMessageMutation } = useDeleteMessage();
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -49,11 +48,24 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     );
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    if (!messageId) return;
+
+    console.log("Attempting to delete message with id:", messageId);
+    deleteMessageMutation(
+      { messageId },
+      {
+        onError: (error) => console.error("Failed to delete message:", error),
+        onSuccess: () => queryClient.invalidateQueries(),
+      }
+    );
+  };
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]); // Scroll when messages update
+  }, [messages]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
@@ -65,11 +77,11 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
 
   if (error) return <div>Error loading messages.</div>;
   if (isPending) return <div>Loading messages...</div>;
-  console.log(messages);
-  console.log(messages.reverse());
+
   return (
     <ChatComponentWrapper>
       <div className="chat-header">Chat</div>
+
       <div className="messages-container">
         {[...messages].reverse().map((msg) => {
           const sender = conversation.otherParticipants.find(
@@ -102,20 +114,43 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                   timeString;
           }
 
+          const isCurrentUser = senderName === currentUser;
+
           return (
-            <div
-              key={msg.id}
-              className={`message-bubble ${
-                senderName === currentUser ? `message-bubble-current-user` : ``
-              } `}
-            >
-              <div className="sender-name">{senderName}</div>
-              <div className="message-text">{msg.content}</div>
-              <div className="timestamp">{formattedTimestamp}</div>
+            <div key={msg.id}>
+              {isCurrentUser ? (
+                <ContextMenu
+                  messageId={msg.id}
+                  items={[
+                    {
+                      text: "Delete",
+                      onClick: () => handleDeleteMessage(msg.id),
+                    },
+                    {
+                      text: "Cancel",
+                      onClick: () => console.log("Cancel clicked"),
+                    },
+                  ]}
+                >
+                  <div
+                    className="message-bubble message-bubble-current-user"
+                    onClick={() => console.log("Clicked message")}
+                  >
+                    <div className="sender-name">{senderName}</div>
+                    <div className="message-text">{msg.content}</div>
+                    <div className="timestamp">{formattedTimestamp}</div>
+                  </div>
+                </ContextMenu>
+              ) : (
+                <div className="message-bubble">
+                  <div className="sender-name">{senderName}</div>
+                  <div className="message-text">{msg.content}</div>
+                  <div className="timestamp">{formattedTimestamp}</div>
+                </div>
+              )}
             </div>
           );
         })}
-
         <div ref={messagesEndRef} />
       </div>
 
@@ -158,11 +193,12 @@ const ChatComponentWrapper = styled.div`
     padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .message-bubble {
-    max-width: 70%;
+    max-width: 95%;
+    width: fit-content;
     align-self: flex-start;
     background: #e5e5ea;
     color: black;
@@ -172,8 +208,10 @@ const ChatComponentWrapper = styled.div`
   }
 
   .message-bubble-current-user {
-    align-self: flex-end;
+    /* does not apply... */
+    align-self: flex-end !important;
     background-color: #81d4fe;
+    cursor: pointer;
   }
 
   .sender-name {
@@ -190,6 +228,29 @@ const ChatComponentWrapper = styled.div`
     text-align: right;
     margin-top: 4px;
     opacity: 0.6;
+  }
+
+  .deleteTooltip {
+    position: absolute;
+    left: 75%;
+    transform: translateX(-50%);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+    width: fit-content;
+    border-radius: 3px;
+  }
+
+  .deleteTooltip button {
+    margin-left: 4px;
+    background: #555;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 12px;
+    width: 100%;
   }
 
   .chat-input-container {
