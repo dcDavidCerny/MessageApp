@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  ReactNode,
-  MouseEvent,
-} from "react";
+import React, { useState, useEffect, useRef, ReactNode, MouseEvent } from "react";
 import styled from "@emotion/styled";
 
 export interface ContextMenuItem {
@@ -13,7 +7,6 @@ export interface ContextMenuItem {
 }
 
 export interface ContextMenuProps {
-  messageId: string;
   items: ContextMenuItem[];
   children: ReactNode;
 }
@@ -23,13 +16,14 @@ const Container = styled.div`
   position: relative;
 `;
 
-interface MenuProps {}
-const Menu = styled.ul<MenuProps>`
-  position: absolute;
+const Menu = styled.ul<{ x: number; y: number }>`
+  position: fixed;
+  top: ${(props) => props.y}px;
+  left: ${(props) => props.x}px;
   background: #fff;
   border: 1px solid #ccc;
   list-style: none;
-  padding: 1px 1px;
+  padding: 4px 0;
   margin: 0;
   z-index: 1000;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
@@ -44,16 +38,13 @@ const MenuItem = styled.li`
   }
 `;
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({
-  messageId,
-  items,
-  children,
-}) => {
+export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children }) => {
   const [visible, setVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const handleContextMenu = (event: MouseEvent) => {
     event.preventDefault();
+    setPosition({ x: event.clientX, y: event.clientY });
     setVisible(true);
   };
 
@@ -71,10 +62,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   }, [visible]);
 
   return (
-    <Container ref={containerRef} onContextMenu={handleContextMenu}>
+    <Container onContextMenu={handleContextMenu}>
       {children}
       {visible && (
-        <Menu>
+        <Menu x={position.x} y={position.y}>
           {items.map((item, index) => (
             <MenuItem
               key={index}
@@ -83,7 +74,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 item.onClick();
                 setVisible(false);
               }}
-              onMouseDown={(e) => e.stopPropagation()}
             >
               {item.text}
             </MenuItem>

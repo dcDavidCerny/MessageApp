@@ -125,7 +125,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
             >
               {isCurrentUser ? (
                 <ContextMenu
-                  messageId={msg.id}
                   items={[
                     {
                       text: "Delete",
@@ -213,7 +212,6 @@ const ChatComponentWrapper = styled.div`
 
   .message-bubble-current-user {
     background-color: #81d4fe;
-    cursor: pointer;
   }
 
   .messageWrapperCurrentUser {
