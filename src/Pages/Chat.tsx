@@ -5,9 +5,17 @@ import { ConversationsColumnComponent } from "../Components/ConversationsColumn"
 import { ErrorComponent } from "../Components/Error";
 import { Loading } from "../Components/Loading";
 import { queryClient } from "../main";
-import { useGetCurrentUser, useUpdateCurrentUser } from "../Query/QueryHooks";
+import {
+  useGetCurrentUser,
+  useGetRecentConversations,
+  useUpdateCurrentUser,
+} from "../Query/QueryHooks";
 
 export const ChatPage = () => {
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+
   const {
     data: user,
     isPending: isUserLoadingPending,
@@ -18,7 +26,6 @@ export const ChatPage = () => {
   const { mutate: updateUser, isPending: updateUserPending } =
     useUpdateCurrentUser();
   const [displayName, setDisplayName] = useState("");
-
   const handleChangeDisplayName = () => {
     updateUser(
       { displayName },
@@ -31,11 +38,20 @@ export const ChatPage = () => {
     );
   };
 
+  const {
+    data: conversations,
+    isPending,
+    error: recentConversationError,
+  } = useGetRecentConversations();
+
   if (error) {
     return <ErrorComponent error={error} />;
   }
+  if (recentConversationError) {
+    return <ErrorComponent error={recentConversationError} />;
+  }
 
-  if (isUserLoadingPending || !user) {
+  if (isUserLoadingPending || !user || isPending || !conversations) {
     return <Loading />;
   }
   return (
@@ -68,8 +84,17 @@ export const ChatPage = () => {
             Change Display Name
           </button>
         </div>
-        <ConversationsColumnComponent />
-        <ChatComponent />
+        <ConversationsColumnComponent
+          conversations={conversations}
+          selectedConversationId={selectedConversationId || ""}
+          setSelectedConversationId={setSelectedConversationId}
+        />
+        <ChatComponent
+          conversation={
+            conversations.find((c) => c.id === selectedConversationId) ||
+            conversations[0]
+          }
+        />
       </ChatPageWrapper>
     </>
   );

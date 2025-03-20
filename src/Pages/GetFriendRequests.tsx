@@ -6,7 +6,6 @@ import {
   useGetFriendRequests,
   useAcceptFriendRequest,
   useDeclineFriendRequest,
-  useCreateDirectConversation,
 } from "../Query/QueryHooks";
 
 export const GetFriendRequestsPage: React.FC = () => {
@@ -20,8 +19,6 @@ export const GetFriendRequestsPage: React.FC = () => {
   const { mutate: acceptFriendRequest, isPending: isAccepting } =
     useAcceptFriendRequest();
 
-  const { mutate: createConversation } = useCreateDirectConversation();
-
   const { mutate: declineFriendRequest, isPending: isDeclining } =
     useDeclineFriendRequest();
 
@@ -31,18 +28,6 @@ export const GetFriendRequestsPage: React.FC = () => {
       {
         onSuccess: () => {
           console.log("Friend request accepted!");
-
-          createConversation(
-            { userId: requestId },
-            {
-              onSuccess: () => {
-                console.log("Conversation created successfully!");
-              },
-              onError: (error) => {
-                console.error("Failed to create conversation:", error.message);
-              },
-            }
-          );
         },
         onError: (error) => {
           console.error("Failed to accept friend request:", error.message);

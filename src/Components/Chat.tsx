@@ -1,5 +1,9 @@
 import styled from "@emotion/styled";
 import React, { useEffect, useRef, useState } from "react";
+import { useGetMessages, useSendMessage } from "../Query/QueryHooks";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../main";
+import { Conversation } from "../Query/types";
 
 interface Message {
   id: number;
@@ -8,75 +12,125 @@ interface Message {
   timestamp: string;
 }
 
-export const ChatComponent: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
+interface ChatComponentProps {
+  conversation: Conversation;
+}
 
+export const ChatComponent: React.FC<ChatComponentProps> = ({
+  conversation,
+}) => {
+  const conversationId = conversation.id;
+  const {
+    data: messages = [],
+    isPending,
+    error,
+  } = useGetMessages(conversationId);
+  const [input, setInput] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentUser = "You"; // Dummy user for now
+  const currentUser = "You";
+
+  const { mutate: sendMessageMutation, data } = useSendMessage();
+
+  const handleSendMessage = () => {
+    if (!input.trim()) return;
+    setInput("");
+    sendMessageMutation(
+      {
+        conversationId,
+        data: {
+          content: input,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries();
+        },
+      }
+    );
+  };
 
   useEffect(() => {
-    // Scroll to bottom when new messages are added
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]); // Triggered when messages state changes
-
-  const sendMessage = () => {
-    if (!input.trim()) return; // Don't send empty messages
-
-    const newMessage: Message = {
-      id: Date.now(),
-      sender: currentUser,
-      text: input,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    setInput(""); // Clear input field
-  };
+  }, [messages]); // Scroll when messages update
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      sendMessage();
-    }
+    if (event.key === "Enter") handleSendMessage();
   };
 
+  if (error) return <div>Error loading messages.</div>;
+  if (isPending) return <div>Loading messages...</div>;
+  console.log(messages);
+  console.log(messages.reverse());
   return (
     <ChatComponentWrapper>
-      <div className="chat-header">Messenger Clone</div>
+      <div className="chat-header">Chat</div>
       <div className="messages-container">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`message-bubble ${
-              msg.sender === currentUser ? "current-user" : ""
-            }`}
-          >
-            <div className="sender-name">{msg.sender}</div>
-            <div className="message-text">{msg.text}</div>
-            <div className="timestamp">{msg.timestamp}</div>
-          </div>
-        ))}
+        {[...messages].reverse().map((msg) => {
+          const sender = conversation.otherParticipants.find(
+            (user) => user.id === msg.senderId
+          );
+          const senderName = sender ? sender.displayName : currentUser;
+
+          const date = new Date(msg.createdAt);
+          const now = new Date();
+          const currentYear = now.getFullYear();
+
+          const isToday =
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear();
+
+          const timeString = date.toLocaleTimeString(undefined, {
+            hour12: false,
+          });
+
+          let formattedTimestamp;
+          if (isToday) {
+            formattedTimestamp = timeString;
+          } else {
+            formattedTimestamp =
+              date.getFullYear() === currentYear
+                ? date.toLocaleDateString(undefined) + " - " + timeString
+                : date.toLocaleDateString(undefined, { year: "numeric" }) +
+                  " - " +
+                  timeString;
+          }
+
+          return (
+            <div
+              key={msg.id}
+              className={`message-bubble ${
+                senderName === currentUser ? `message-bubble-current-user` : ``
+              } `}
+            >
+              <div className="sender-name">{senderName}</div>
+              <div className="message-text">{msg.content}</div>
+              <div className="timestamp">{formattedTimestamp}</div>
+            </div>
+          );
+        })}
 
         <div ref={messagesEndRef} />
-        <div className="chat-input-container">
-          <input
-            type="text"
-            className="chat-input"
-            placeholder="Type a message..."
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-          />
-          <button className="send-button" onClick={sendMessage}>
-            Send
-          </button>
-        </div>
+      </div>
+
+      <div className="chat-input-container">
+        <input
+          type="text"
+          className="chat-input"
+          placeholder="Type a message..."
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+        />
+        <button className="send-button" onClick={handleSendMessage}>
+          Send
+        </button>
       </div>
     </ChatComponentWrapper>
   );
@@ -117,10 +171,9 @@ const ChatComponentWrapper = styled.div`
     margin: 5px 0;
   }
 
-  .message-bubble.current-user {
+  .message-bubble-current-user {
     align-self: flex-end;
-    background: #0078ff;
-    color: white;
+    background-color: #81d4fe;
   }
 
   .sender-name {
