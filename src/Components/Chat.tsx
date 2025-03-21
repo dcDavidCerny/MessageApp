@@ -156,6 +156,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     <div className="sender-name">{senderName}</div>
                     <div className="message-text">{msg.content}</div>
                     <div className="timestamp">{formattedTimestamp}</div>
+
                     <div className="threeDotsIconDiv">
                       <ContextMenu
                         items={[
@@ -197,6 +198,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     <div className="sender-name">{senderName}</div>
                     <div className="message-text">{msg.content}</div>
                     <div className="timestamp">{formattedTimestamp}</div>
+
                     <div className="threeDotsIconDiv">
                       <ContextMenu
                         items={[
@@ -317,12 +319,19 @@ const ChatComponentWrapper = styled.div`
     opacity: 0.6;
   }
 
+  .message-bubble:hover .threeDotsIconDiv svg {
+    transition: opacity 0.33s cubic-bezier(1, 0.03, 1, -0.17);
+    opacity: 1;
+  }
+
   .threeDotsIconDiv {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    position: absolute;
+    right: 6px;
+    top: 13px;
     cursor: pointer;
-    position: relative;
+    svg {
+      opacity: 0;
+    }
   }
 
   .deleteTooltip {
