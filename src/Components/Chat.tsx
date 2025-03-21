@@ -4,10 +4,12 @@ import {
   useGetMessages,
   useSendMessage,
   useDeleteMessage,
+  useGetCurrentUser,
 } from "../Query/QueryHooks";
 import { queryClient } from "../main";
 import { Conversation } from "../Query/types";
 import ContextMenu from "./ContextMemu";
+import ForwardModalComponent from "./ForwardModal";
 
 interface ChatComponentProps {
   conversation: Conversation;
@@ -22,7 +24,13 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     isPending,
     error,
   } = useGetMessages(conversationId);
+
+  const { data: currentUserData } = useGetCurrentUser();
+  const currentUserId = currentUserData?.id;
+
   const [input, setInput] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [forwardMessage, setForwardMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentUser = "You";
 
@@ -46,6 +54,11 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         },
       }
     );
+  };
+
+  const handleOpenForwardModal = (messageContent: string) => {
+    setForwardMessage(messageContent);
+    setIsModalOpen(true);
   };
 
   const handleDeleteMessage = (messageId: string) => {
@@ -131,8 +144,8 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                       onClick: () => handleDeleteMessage(msg.id),
                     },
                     {
-                      text: "Cancel",
-                      onClick: () => console.log("Cancel clicked"),
+                      text: "Forward",
+                      onClick: () => handleOpenForwardModal(msg.content),
                     },
                   ]}
                 >
@@ -143,14 +156,71 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     <div className="sender-name">{senderName}</div>
                     <div className="message-text">{msg.content}</div>
                     <div className="timestamp">{formattedTimestamp}</div>
+                    <div className="threeDotsIconDiv">
+                      <ContextMenu
+                        items={[
+                          {
+                            text: "Delete",
+                            onClick: () => handleDeleteMessage(msg.id),
+                          },
+                          {
+                            text: "Forward",
+                            onClick: () => handleOpenForwardModal(msg.content),
+                          },
+                        ]}
+                        isOnClick
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          fill="currentColor"
+                          className="bi bi-three-dots-vertical"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                        </svg>
+                      </ContextMenu>
+                    </div>
                   </div>
                 </ContextMenu>
               ) : (
-                <div className="message-bubble">
-                  <div className="sender-name">{senderName}</div>
-                  <div className="message-text">{msg.content}</div>
-                  <div className="timestamp">{formattedTimestamp}</div>
-                </div>
+                <ContextMenu
+                  items={[
+                    {
+                      text: "Forward",
+                      onClick: () => handleOpenForwardModal(msg.content),
+                    },
+                  ]}
+                >
+                  <div className="message-bubble">
+                    <div className="sender-name">{senderName}</div>
+                    <div className="message-text">{msg.content}</div>
+                    <div className="timestamp">{formattedTimestamp}</div>
+                    <div className="threeDotsIconDiv">
+                      <ContextMenu
+                        items={[
+                          {
+                            text: "Forward",
+                            onClick: () => handleOpenForwardModal(msg.content),
+                          },
+                        ]}
+                        isOnClick
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          fill="currentColor"
+                          className="bi bi-three-dots-vertical"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                        </svg>
+                      </ContextMenu>
+                    </div>
+                  </div>
+                </ContextMenu>
               )}
             </div>
           );
@@ -171,6 +241,13 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
           Send
         </button>
       </div>
+      {isModalOpen && (
+        <ForwardModalComponent
+          onClose={() => setIsModalOpen(false)}
+          currentUserId={currentUserData?.id || ""}
+          forwardMessage={forwardMessage}
+        />
+      )}
     </ChatComponentWrapper>
   );
 };
@@ -238,6 +315,14 @@ const ChatComponentWrapper = styled.div`
     text-align: right;
     margin-top: 4px;
     opacity: 0.6;
+  }
+
+  .threeDotsIconDiv {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    position: relative;
   }
 
   .deleteTooltip {

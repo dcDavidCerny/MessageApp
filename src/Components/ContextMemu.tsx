@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, ReactNode, MouseEvent } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  ReactNode,
+  MouseEvent,
+} from "react";
 import styled from "@emotion/styled";
 
 export interface ContextMenuItem {
@@ -9,6 +15,7 @@ export interface ContextMenuItem {
 export interface ContextMenuProps {
   items: ContextMenuItem[];
   children: ReactNode;
+  isOnClick?: boolean;
 }
 
 const Container = styled.div`
@@ -38,13 +45,23 @@ const MenuItem = styled.li`
   }
 `;
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children }) => {
+export const ContextMenu: React.FC<ContextMenuProps> = ({
+  items,
+  children,
+  isOnClick = false,
+}) => {
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const handleContextMenu = (event: MouseEvent) => {
     event.preventDefault();
     setPosition({ x: event.clientX, y: event.clientY });
+    setVisible(true);
+  };
+
+  const handleClickMenu = (event: MouseEvent) => {
+    event.stopPropagation();
+    setPosition({ x: event.clientX - 50, y: event.clientY });
     setVisible(true);
   };
 
@@ -62,7 +79,11 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children }) => 
   }, [visible]);
 
   return (
-    <Container onContextMenu={handleContextMenu}>
+    <Container
+      {...(isOnClick
+        ? { onClick: handleClickMenu }
+        : { onContextMenu: handleContextMenu })}
+    >
       {children}
       {visible && (
         <Menu x={position.x} y={position.y}>
