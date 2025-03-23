@@ -2,6 +2,9 @@ import { db, generateId, saveDb } from "../db.js";
 import { Conversation } from "../types.js";
 
 export class ConversationModel {
+  static findByIdAndDelete(conversationId: string) {
+    throw new Error("Method not implemented.");
+  }
   /**
    * Create a new conversation
    * @param conversationData Conversation data without id, createdAt, updatedAt

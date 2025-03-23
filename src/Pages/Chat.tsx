@@ -10,6 +10,7 @@ import {
   useGetRecentConversations,
   useUpdateCurrentUser,
 } from "../Query/QueryHooks";
+import { TemporaryComponent } from "../Components/TemporaryColumnForMoreHooks";
 
 export const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<
@@ -58,6 +59,7 @@ export const ChatPage = () => {
     <>
       {updateUserPending && <Loading animation="pulse" />}
       <ChatPageWrapper>
+        <TemporaryComponent></TemporaryComponent>
         <ConversationsColumnComponent
           conversations={conversations}
           selectedConversationId={selectedConversationId || ""}

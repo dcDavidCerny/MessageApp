@@ -122,3 +122,8 @@ export interface UpdatesCheckResponse {
 export interface ErrorResponse {
   error: string;
 }
+
+export interface UploadResponse {
+  fileUrl: string;
+  message: string;
+}

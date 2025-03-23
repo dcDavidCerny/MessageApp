@@ -25,9 +25,62 @@ import {
   UpdateUserRequest,
   User,
   VerifyResponse,
+  // New types for UploadResponse, created in types.ts
+  UploadResponse,
 } from "./types";
 
-const apiHost = "http://localhost:3000";
+export const apiHost = "http://localhost:3000";
+
+// start of new code
+
+
+
+
+
+
+
+
+
+export const useUploadFile = (
+  options?: UseMutationOptions<UploadResponse, Error, File>
+) => {
+  return useMutation<UploadResponse, Error, File>({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${apiHost}/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error - POST /upload, status: ${response.status}`);
+      }
+      return response.json();
+    },
+    ...options,
+  });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// end of new code
 
 // General purpose API query hook
 export const useApiQuery = <TData = unknown>(
@@ -453,18 +506,12 @@ export const useGetMessages = (
 };
 
 export const useSendMessage = (
-  options?: UseMutationOptions<
-    Message,
-    Error,
-    { conversationId: string; data: SendMessageRequest }
-  >
+  options?: UseMutationOptions<Message, Error, { conversationId: string; data: SendMessageRequest }>
 ) => {
-  return useMutation<
-    Message,
-    Error,
-    { conversationId: string; data: SendMessageRequest }
-  >({
+  return useMutation<Message, Error, { conversationId: string; data: SendMessageRequest }>({
     mutationFn: async ({ conversationId, data }) => {
+      console.log("Sending message data:", data);  // Add this log to inspect the data
+
       const route = `/messages/conversations/${conversationId}/messages`;
       const response = await fetch(`${apiHost}${route}`, {
         method: "POST",

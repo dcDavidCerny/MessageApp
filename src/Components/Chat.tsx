@@ -5,6 +5,8 @@ import {
   useSendMessage,
   useDeleteMessage,
   useGetCurrentUser,
+  useUploadFile,
+  apiHost, // new hook for file uploads
 } from "../Query/QueryHooks";
 import { queryClient } from "../main";
 import { Conversation } from "../Query/types";
@@ -32,11 +34,43 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [forwardMessage, setForwardMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const currentUser = "You";
 
   const { mutate: sendMessageMutation } = useSendMessage();
-
   const { mutate: deleteMessageMutation } = useDeleteMessage();
+
+  // Destructure the file upload mutation hook.
+  const {
+    mutate: uploadFile,
+    status,
+    isError,
+    error: uploadError,
+  } = useUploadFile({
+    onSuccess: (data) => {
+      console.log("File uploaded:", data.fileUrl);
+
+      sendMessageMutation(
+        {
+          conversationId,
+          data: {
+            content: "",
+            metadata: {
+              attachments: [
+                { url: data.fileUrl, type: getFileType(data.fileUrl) },
+              ],
+            },
+          },
+        },
+        { onSuccess: () => queryClient.invalidateQueries() }
+      );
+    },
+    onError: (err) => {
+      console.error("File upload failed:", err);
+    },
+  });
+
+  const isLoading = status === "pending";
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -63,7 +97,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
 
   const handleDeleteMessage = (messageId: string) => {
     if (!messageId) return;
-
     console.log("Attempting to delete message with id:", messageId);
     deleteMessageMutation(
       { messageId },
@@ -88,11 +121,57 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     if (event.key === "Enter") handleSendMessage();
   };
 
+  // Handle file selection from the file input
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadFile(file);
+    }
+  };
+
+  // Handle pasted files (e.g. screenshots)
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+      const file = e.clipboardData.files[0];
+      uploadFile(file);
+    }
+  };
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const formatMessage = (message: string) => {
+    return message.split(urlRegex).map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="href-link"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   if (error) return <div>Error loading messages.</div>;
   if (isPending) return <div>Loading messages...</div>;
 
+  const getFileType = (fileUrl: string) => {
+    const ext = fileUrl.split(".").pop();
+    if (ext === "jpg" || ext === "jpeg" || ext === "png" || ext === "gif") {
+      return "image";
+    } else if (ext === "mp4" || ext === "mkv" || ext === "webm") {
+      return "video";
+    }
+    return "other";
+  };
+
   return (
-    <ChatComponentWrapper>
+    <ChatComponentWrapper onPaste={handlePaste}>
       <div className="chat-header">Chat</div>
 
       <div className="messages-container">
@@ -154,9 +233,55 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     onClick={() => console.log("Clicked message")}
                   >
                     <div className="sender-name">{senderName}</div>
-                    <div className="message-text">{msg.content}</div>
+                    <div className="message-text">
+                      {formatMessage(msg.content)}
+                    </div>
+                    {msg.metadata?.attachments &&
+                      msg.metadata.attachments.map(
+                        (attachment: {
+                          url: string;
+                          type: "image" | "video" | "audio" | "other";
+                        }) => {
+                          const url = apiHost + attachment.url;
+                          return (
+                            <div key={url}>
+                              {attachment.type === "image" && (
+                                <img
+                                  src={url}
+                                  alt="Attachment"
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "200px",
+                                  }}
+                                />
+                              )}
+                              {attachment.type === "video" && (
+                                <video
+                                  src={url}
+                                  controls
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "200px",
+                                  }}
+                                />
+                              )}
+                              {attachment.type === "audio" && (
+                                <audio
+                                  src={url}
+                                  controls
+                                  style={{ maxWidth: "100%" }}
+                                />
+                              )}
+                              {attachment.type === "other" && (
+                                <a href={url} target="_blank" rel="noreferrer">
+                                  {attachment.url}
+                                </a>
+                              )}
+                            </div>
+                          );
+                        }
+                      )}
                     <div className="timestamp">{formattedTimestamp}</div>
-
                     <div className="threeDotsIconDiv">
                       <ContextMenu
                         items={[
@@ -198,7 +323,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     <div className="sender-name">{senderName}</div>
                     <div className="message-text">{msg.content}</div>
                     <div className="timestamp">{formattedTimestamp}</div>
-
                     <div className="threeDotsIconDiv">
                       <ContextMenu
                         items={[
@@ -242,7 +366,26 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         <button className="send-button" onClick={handleSendMessage}>
           Send
         </button>
+        <button
+          className="upload-button"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Upload File
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFileSelect}
+        />
+        {isLoading && <span className="upload-status">Uploading file...</span>}
+        {isError && (
+          <span className="upload-status error">
+            Upload failed: {uploadError?.message}
+          </span>
+        )}
       </div>
+
       {isModalOpen && (
         <ForwardModalComponent
           onClose={() => setIsModalOpen(false)}
@@ -253,6 +396,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     </ChatComponentWrapper>
   );
 };
+
 const ChatComponentWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -310,8 +454,19 @@ const ChatComponentWrapper = styled.div`
   .message-text {
     font-size: 16px;
     word-break: break-all;
-  }
 
+    .href-link {
+      color: black;
+      font-weight: 500;
+      opacity: 0.9;
+      text-decoration: underline;
+      word-break: break-all;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
   .timestamp {
     font-size: 10px;
     text-align: right;

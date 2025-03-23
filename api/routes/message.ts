@@ -58,7 +58,7 @@ router.post(
       const conversationId = req.params.id;
       const { content, metadata } = req.body;
 
-      if (!content) {
+      if (!content && !metadata) {
         res.status(400).json({ error: "Message content is required" });
         return;
       }
