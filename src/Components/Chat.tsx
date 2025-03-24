@@ -12,6 +12,7 @@ import { queryClient } from "../main";
 import { Conversation } from "../Query/types";
 import ContextMenu from "./ContextMemu";
 import ForwardModalComponent from "./ForwardModal";
+import { useAudioRecorder } from "use-audio-recorder";
 
 interface ChatComponentProps {
   conversation: Conversation;
@@ -33,6 +34,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   const [input, setInput] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [forwardMessage, setForwardMessage] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentUser = "You";
@@ -88,6 +90,57 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         },
       }
     );
+  };
+
+  const recorder = useAudioRecorder();
+  console.log("recorder", recorder);
+
+  const uploadAudio = () => {
+    if (!recorder.blob) return;
+    const formData = new FormData();
+    formData.append("file", recorder.blob, "audio.webm");
+
+    try {
+      fetch(`${apiHost}/upload`, {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Audio uploaded:", data.fileUrl);
+
+          sendMessageMutation(
+            {
+              conversationId,
+              data: {
+                content: "",
+                metadata: {
+                  attachments: [{ url: data.fileUrl, type: "audio" }],
+                },
+              },
+            },
+            { onSuccess: () => queryClient.invalidateQueries() }
+          );
+        });
+    } catch (error) {
+      console.error("Failed to upload audio:", error);
+    }
+  };
+
+  useEffect(() => {
+    (recorder as any).onRecordingStop = () => {
+      setIsRecording(false);
+    };
+  }, [recorder]);
+
+  const handleRecorderClick = () => {
+    if (isRecording) {
+      recorder.stopRecording();
+      setIsRecording(false);
+    } else {
+      recorder.startRecording();
+      setIsRecording(true);
+    }
   };
 
   const handleOpenForwardModal = (messageContent: string) => {
@@ -383,6 +436,16 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
           <span className="upload-status error">
             Upload failed: {uploadError?.message}
           </span>
+        )}
+
+        <button onClick={() => handleRecorderClick()}>
+          {isRecording ? "Stop Recording" : "Start Recording"}
+        </button>
+        {recorder.blob && (
+          <>
+            <audio controls src={URL.createObjectURL(recorder.blob)} />
+            <button onClick={uploadAudio}>Audio Upload</button>
+          </>
         )}
       </div>
 

@@ -7,6 +7,7 @@ import { ConversationComponent } from "./Conversation";
 import { ChatComponent } from "./Chat";
 import { ChatPage } from "../Pages/Chat";
 import { Conversation } from "../Query/types";
+import { CreateGroupConversation } from "./CreateGroupConversation";
 
 interface ConversationsColumnComponentProps {
   selectedConversationId: string;
@@ -37,6 +38,7 @@ export const ConversationsColumnComponent = ({
             selected={selectedConversationId === conversation.id}
           />
         ))}
+        <CreateGroupConversation />
       </div>
     </ConversationsColumnComponentWrapper>
   );
