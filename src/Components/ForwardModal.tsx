@@ -119,7 +119,7 @@ const SendButton = styled.button`
 interface ForwardModalProps {
   onClose: () => void;
   currentUserId: string;
-  forwardMessage: string | null;
+  forwardMessage: SendMessageRequest | null;
 }
 
 const ForwardModal: React.FC<ForwardModalProps> = ({
@@ -186,13 +186,10 @@ const ForwardModal: React.FC<ForwardModalProps> = ({
       { userId: user.id },
       {
         onSuccess: (conversation) => {
-          const messageRequest: SendMessageRequest = {
-            content: forwardMessage,
-          };
           queryClient.invalidateQueries();
 
           sendMessage.mutate(
-            { conversationId: conversation.id, data: messageRequest },
+            { conversationId: conversation.id, data: forwardMessage },
             {
               onSuccess: (message: Message) => {
                 queryClient.invalidateQueries();

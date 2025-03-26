@@ -15,7 +15,7 @@ const GROUP_IMG_SRC = () => {
     </svg>
   );
 };
-const DEFAULT_AVATAR_SRC = () => {
+export const DEFAULT_AVATAR_SRC = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
