@@ -1,5 +1,8 @@
 import styled from "@emotion/styled";
 import { Conversation } from "../Query/types";
+import ContextMenu from "./ContextMemu";
+import { useState } from "react";
+import { EditGroupConversation } from "./EditGroupConversation";
 
 const GROUP_IMG_SRC = () => {
   return (
@@ -75,28 +78,67 @@ export const ConversationComponent = ({
           " - " +
           timeString;
   }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <ConversationComponentWrapper>
-      <div
-        key={conversation.id}
-        className={`conversation-item ${selected ? "selected" : ""}`}
-        onClick={() => onClick()}
-      >
-        <div>
-          {typeof conversationImg === "function" ? (
-            conversationImg()
-          ) : (
-            <img src={conversationImg} alt="Avatar" />
-          )}
+      {conversation.isGroup ? (
+        <ContextMenu
+          items={[
+            {
+              text: "Manage group",
+              onClick: () => {
+                setIsModalOpen(true);
+              },
+            },
+          ]}
+        >
+          <div
+            key={conversation.id}
+            className={`conversation-item ${selected ? "selected" : ""}`}
+            onClick={onClick}
+          >
+            <div>
+              {typeof conversationImg === "function" ? (
+                conversationImg()
+              ) : (
+                <img src={conversationImg} alt="Avatar" />
+              )}
+            </div>
+            <div className="conversation-info">
+              <div className="user-name">{conversationName}</div>
+              <div className="last-message">last message</div>
+            </div>
+            <div className="timestamp">{formattedLastMessage}</div>
+          </div>
+        </ContextMenu>
+      ) : (
+        <div
+          key={conversation.id}
+          className={`conversation-item ${selected ? "selected" : ""}`}
+          onClick={onClick}
+        >
+          <div>
+            {typeof conversationImg === "function" ? (
+              conversationImg()
+            ) : (
+              <img src={conversationImg} alt="Avatar" />
+            )}
+          </div>
+          <div className="conversation-info">
+            <div className="user-name">{conversationName}</div>
+            <div className="last-message">last message</div>
+          </div>
+          <div className="timestamp">{formattedLastMessage}</div>
         </div>
+      )}
 
-        <div className="conversation-info">
-          <div className="user-name">{conversationName}</div>
-          <div className="last-message">last message</div>
-        </div>
-        <div className="timestamp">{formattedLastMessage}</div>
-      </div>
+      {isModalOpen && (
+        <EditGroupConversation
+          conversation={conversation}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </ConversationComponentWrapper>
   );
 };

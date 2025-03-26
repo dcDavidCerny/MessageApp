@@ -260,7 +260,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
 
       <div className="messages-container">
         {(() => {
-          // Compute the last message sent by the current user.
           const lastSentMessage = messages
             .filter((msg) => msg.senderId === currentUserId)
             .slice(-1)[0];
@@ -478,6 +477,17 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                           }
                         )}
                       <div className="timestamp">{formattedTimestamp}</div>
+                      {lastSentMessage && msg.id === lastSentMessage.id && (
+                        // {currentUserData?.avatarUrl ? (
+                        //   <img
+                        //     className="avatarReadIndicator"
+                        //     src={currentUserData.avatarUrl}
+                        //     alt={currentUserData.displayName || "User Avatar"}
+                        //   />
+                        // ) : (
+                        <DEFAULT_AVATAR_SRC />
+                        // )}
+                      )}
                       <div className="threeDotsIconDiv">
                         <ContextMenu
                           items={[
