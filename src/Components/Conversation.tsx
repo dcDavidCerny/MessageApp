@@ -113,24 +113,35 @@ export const ConversationComponent = ({
           </div>
         </ContextMenu>
       ) : (
-        <div
-          key={conversation.id}
-          className={`conversation-item ${selected ? "selected" : ""}`}
-          onClick={onClick}
+        <ContextMenu
+          items={[
+            {
+              text: "Delete conversation",
+              onClick: () => {
+                console.log("Delete conversation");
+              },
+            },
+          ]}
         >
-          <div>
-            {typeof conversationImg === "function" ? (
-              conversationImg()
-            ) : (
-              <img src={conversationImg} alt="Avatar" />
-            )}
+          <div
+            key={conversation.id}
+            className={`conversation-item ${selected ? "selected" : ""}`}
+            onClick={onClick}
+          >
+            <div>
+              {typeof conversationImg === "function" ? (
+                conversationImg()
+              ) : (
+                <img src={conversationImg} alt="Avatar" />
+              )}
+            </div>
+            <div className="conversation-info">
+              <div className="user-name">{conversationName}</div>
+              <div className="last-message">last message</div>
+            </div>
+            <div className="timestamp">{formattedLastMessage}</div>
           </div>
-          <div className="conversation-info">
-            <div className="user-name">{conversationName}</div>
-            <div className="last-message">last message</div>
-          </div>
-          <div className="timestamp">{formattedLastMessage}</div>
-        </div>
+        </ContextMenu>
       )}
 
       {isModalOpen && (

@@ -376,17 +376,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                           }
                         )}
                       <div className="timestamp">{formattedTimestamp}</div>
-                      {lastSentMessage && msg.id === lastSentMessage.id && (
-                        // {currentUserData?.avatarUrl ? (
-                        //   <img
-                        //     className="avatarReadIndicator"
-                        //     src={currentUserData.avatarUrl}
-                        //     alt={currentUserData.displayName || "User Avatar"}
-                        //   />
-                        // ) : (
-                        <DEFAULT_AVATAR_SRC />
-                        // )}
-                      )}
                       <div className="threeDotsIconDiv">
                         <ContextMenu
                           items={[
@@ -477,17 +466,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                           }
                         )}
                       <div className="timestamp">{formattedTimestamp}</div>
-                      {lastSentMessage && msg.id === lastSentMessage.id && (
-                        // {currentUserData?.avatarUrl ? (
-                        //   <img
-                        //     className="avatarReadIndicator"
-                        //     src={currentUserData.avatarUrl}
-                        //     alt={currentUserData.displayName || "User Avatar"}
-                        //   />
-                        // ) : (
-                        <DEFAULT_AVATAR_SRC />
-                        // )}
-                      )}
                       <div className="threeDotsIconDiv">
                         <ContextMenu
                           items={[
@@ -695,14 +673,6 @@ const ChatComponentWrapper = styled.div`
     font-size: 12px;
     width: 100%;
   }
-
-  .avatarReadIndicator {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
-
   .chat-input-container {
     display: flex;
     padding: 10px;
