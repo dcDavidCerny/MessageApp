@@ -16,7 +16,6 @@ import ContextMenu from "./ContextMemu";
 import ForwardModalComponent from "./ForwardModal";
 import { useAudioRecorder } from "use-audio-recorder";
 import { ScreenRecorder } from "./ScreenRecorder";
-import { DEFAULT_AVATAR_SRC } from "./Conversation";
 
 interface ChatComponentProps {
   conversation: Conversation;
@@ -25,6 +24,11 @@ interface ChatComponentProps {
 export const ChatComponent: React.FC<ChatComponentProps> = ({
   conversation,
 }) => {
+  // If no conversation exists, show a placeholder message.
+  if (!conversation) {
+    return <p>No conversations yet. Start a new chat!</p>;
+  }
+
   const conversationId = conversation.id;
   const {
     data: messages = [],
@@ -164,7 +168,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       }
     );
   };
-  //
 
   const markConversationAsReadMutation = useMarkConversationAsRead({
     onSuccess: () => {
@@ -188,8 +191,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   ).length;
 
   const lastMessage = messages.length ? messages[messages.length - 1] : null;
-
-  //
 
   useEffect(() => {
     if (messagesEndRef.current) {
