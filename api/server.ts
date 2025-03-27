@@ -44,15 +44,42 @@ const storage = multer.diskStorage({
 const upload: Multer = multer({ storage });
 
 // Middleware
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://messageapp.dcdavidcerny.com"
-        : "http://localhost:5173",
-    credentials: true, // Allow cookies with CORS
+    origin: function (origin, callback) {
+      // Add both localhost and external IP address
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://213.180.47.252:5173",  // Your external IP address
+      ];
+      
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);  // Allow if origin is in the allowed list
+      } else {
+        callback(new Error("Not allowed by CORS"));  // Block if origin is not allowed
+      }
+    },
+    credentials: true,  // Allow cookies with CORS
   })
 );
+
+
+
+
+
+
+
+
+// app.use(
+//   cors({
+//     origin:
+//       process.env.NODE_ENV === "production"
+//         ? "https://messageapp.dcdavidcerny.com"
+//         : "http://localhost:5173",
+//     credentials: true, // Allow cookies with CORS
+//   })
+// );
 app.use(express.json());
 app.use(cookieParser());
 

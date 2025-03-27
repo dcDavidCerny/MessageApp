@@ -29,7 +29,7 @@ import {
   UploadResponse,
 } from "./types";
 
-export const apiHost = "http://localhost:3000";
+export const apiHost = `http://${location.hostname}:3000`;
 
 // start of new code
 
