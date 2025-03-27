@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { HashRouter } from "react-router";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,7 +19,9 @@ export const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <HashRouter>
+        <App />
+      </HashRouter>
       <ReactQueryDevtools initialIsOpen position="right" />
     </QueryClientProvider>
   </StrictMode>
