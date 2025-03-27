@@ -11,19 +11,14 @@ import { GetFriendsPage } from "./Pages/GetFriends";
 function App() {
   return (
     <AppWrapper>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginComponent />} />
-          <Route path="/register" element={<RegisterComponent />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/searchUsers" element={<SearchUsersPage />} />
-          <Route
-            path="/getFriendRequests"
-            element={<GetFriendRequestsPage />}
-          />
-          <Route path="/getFriends" element={<GetFriendsPage />} />
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginComponent />} />
+        <Route path="/register" element={<RegisterComponent />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/searchUsers" element={<SearchUsersPage />} />
+        <Route path="/getFriendRequests" element={<GetFriendRequestsPage />} />
+        <Route path="/getFriends" element={<GetFriendsPage />} />
+      </Routes>
     </AppWrapper>
   );
 }
