@@ -15,23 +15,8 @@ export const queryClient = new QueryClient({
   },
 });
 
-// !Persister disabled for now
-// Persister is optional, but it allows you to persist the cache in localStorage
-// faster loading times with old data and then refetch from API if needed
-// const persister = createSyncStoragePersister({
-//   storage: window.localStorage,
-// });
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* <PersistQueryClientProvider
-      onSuccess={() => queryClient.invalidateQueries()} // invalidate all queries when data loads from localStorage to refetch them
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
-      <App />
-      <ReactQueryDevtools initialIsOpen position="right" />
-    </PersistQueryClientProvider> */}
     <QueryClientProvider client={queryClient}>
       <App />
       <ReactQueryDevtools initialIsOpen position="right" />
