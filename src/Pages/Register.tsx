@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Loading } from "../Components/Loading";
 import { useRegister } from "../Query/QueryHooks";
 
@@ -79,10 +79,9 @@ export const RegisterComponent = () => {
         <button type="submit">Register</button>
       </form>
 
-      <div className="hrefToLoginDiv">
-        <p>You got account? Login down here:</p>
-        <button className="hrefToLogin">LOGIN HERE</button>
-      </div>
+      <Link to="/login">
+        <button className="hrefToLogin"> LOGIN HERE</button>
+      </Link>
     </RegisterWrapper>
   );
 };

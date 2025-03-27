@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Loading } from "../Components/Loading";
 import { useLogin } from "../Query/QueryHooks";
+import { Link } from "react-router-dom";
 
 export const LoginComponent = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +54,9 @@ export const LoginComponent = () => {
       </form>
       <div className="hrefToRegisterDiv">
         <p>Are you new here? Register down here:</p>
-        <button className="hrefToRegister">REGISTER HERE</button>
+        <Link to="/register">
+          <button className="hrefToRegister"> REGISTER HERE</button>
+        </Link>
       </div>
     </LoginWrapper>
   );
