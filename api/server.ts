@@ -51,7 +51,8 @@ app.use(
       // Add both localhost and external IP address
       const allowedOrigins = [
         "http://localhost:5173",
-        "http://213.180.47.252:5173",  // Your external IP address
+        "http://213.180.47.252:5173",
+        "https://dcdavidcerny.github.io", 
       ];
       
       if (!origin || allowedOrigins.includes(origin)) {

@@ -7,5 +7,12 @@ export default defineConfig({
   build: {
     outDir: `./out`,
   },
-  base: "/MessageApp/"
+  base: "/MessageApp/",
+  server: {
+    allowedHosts: [
+      'daveweb.zapto.org',  // Add your host here
+      'localhost',          // Optional: Allow localhost as well
+      '127.0.0.1',          // Optional: Allow local IP address
+    ],
+  },
 })

@@ -155,6 +155,7 @@ export const ScreenRecorder: React.FC<ScreenRecorderProps> = ({
       });
       uploadFile(file);
     }
+    resetRecording();
   };
 
   // Determine button label and action based on state.
