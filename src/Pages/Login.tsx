@@ -51,6 +51,10 @@ export const LoginComponent = () => {
         />
         <button type="submit">Login</button>
       </form>
+      <div className="hrefToRegisterDiv">
+        <p>Are you new here? Register down here:</p>
+        <button className="hrefToRegister">REGISTER HERE</button>
+      </div>
     </LoginWrapper>
   );
 };
@@ -61,6 +65,24 @@ const LoginWrapper = styled.div`
   margin: auto;
   background-color: #00e5fa;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  .hrefToRegisterDiv {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    p {
+      font-size: 18px;
+    }
+
+    .hrefToRegister {
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  }
 `;
