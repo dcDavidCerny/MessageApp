@@ -45,7 +45,6 @@ export const ConversationsColumnComponent = ({
 };
 
 const ConversationsColumnComponentWrapper = styled.div`
-  width: 300px;
   background-color: #f5f5f5;
   border-right: 1px solid #ccc;
   display: flex;

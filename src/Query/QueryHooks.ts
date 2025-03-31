@@ -29,11 +29,8 @@ import {
   UploadResponse,
 } from "./types";
 
-const hostname = location.hostname.includes("github") ? "213.180.47.252" : location.hostname;
+export const apiHost = `https://${location.hostname}/api`;
 
-export const apiHost = `http://${hostname}:3000`;
-
-// start of new code
 
 
 

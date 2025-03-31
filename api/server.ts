@@ -51,8 +51,7 @@ app.use(
       // Add both localhost and external IP address
       const allowedOrigins = [
         "http://localhost:5173",
-        "http://213.180.47.252:5173",
-        "https://dcdavidcerny.github.io", 
+        "https://daveweb.zapto.org",  // Add your public domain
       ];
       
       if (!origin || allowedOrigins.includes(origin)) {
@@ -127,7 +126,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // Handle non-existent paths
 app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: "Requested path does not exist" });
+  res.status(404).json({ error: "Requested path does not exist", path: req.url });
 });
 
 // Start server

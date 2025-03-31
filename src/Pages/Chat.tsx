@@ -11,6 +11,7 @@ import {
   useUpdateCurrentUser,
 } from "../Query/QueryHooks";
 import { TemporaryComponent } from "../Components/TemporaryColumnForMoreHooks";
+import { ResizeComponentWrapper } from "../Components/ResizeComponentWrapper";
 
 export const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<
@@ -60,17 +61,23 @@ export const ChatPage = () => {
       {updateUserPending && <Loading animation="pulse" />}
       <ChatPageWrapper>
         <TemporaryComponent></TemporaryComponent>
-        <ConversationsColumnComponent
-          conversations={conversations}
-          selectedConversationId={selectedConversationId || ""}
-          setSelectedConversationId={setSelectedConversationId}
-        />
-        <ChatComponent
-          conversation={
-            conversations.find((c) => c.id === selectedConversationId) ||
-            conversations[0]
-          }
-        />
+        <ResizeComponentWrapper
+          initialConversationListWidth={200}
+          conversationListMinWidth={170}
+          conversationListMaxWidth={254}
+        >
+          <ConversationsColumnComponent
+            conversations={conversations}
+            selectedConversationId={selectedConversationId || ""}
+            setSelectedConversationId={setSelectedConversationId}
+          />
+          <ChatComponent
+            conversation={
+              conversations.find((c) => c.id === selectedConversationId) ||
+              conversations[0]
+            }
+          />
+        </ResizeComponentWrapper>
       </ChatPageWrapper>
     </>
   );
