@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start API Server",
+      "type": "npm",
+      "script": "server:watch",
+      "problemMatcher": [],
+      "presentation": {
+        "group": "watch",
+        "close": true
+      }
+    },
+    {
+      "label": "Start Vite Dev Server",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "presentation": {
+        "group": "watch",
+        "close": true
+      }
+    },
+    {
+      "label": "Dev: Start Both Servers",
+      "dependsOn": ["Start API Server", "Start Vite Dev Server"],
+      "problemMatcher": []
+    }
+  ]
+}
