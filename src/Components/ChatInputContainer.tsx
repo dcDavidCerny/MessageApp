@@ -165,7 +165,7 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
         <ButtonSecondary
           className="upload-button"
           onClick={() => fileInputRef.current?.click()}
-          text="XXXXXXXXXXX"
+          text="Upload File!"
         />
         <input
           ref={fileInputRef}
