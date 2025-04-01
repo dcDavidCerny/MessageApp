@@ -1,20 +1,19 @@
 import styled from "@emotion/styled";
 import React, { useEffect, useRef, useState } from "react";
+import { useAudioRecorder } from "use-audio-recorder";
+import { queryClient } from "../main";
 import {
-  useGetMessages,
-  useSendMessage,
+  apiHost,
   useDeleteMessage,
   useGetCurrentUser,
-  useUploadFile,
-  apiHost,
+  useGetMessages,
   useMarkConversationAsRead,
-  // new hook for file uploads
+  useSendMessage,
+  useUploadFile,
 } from "../Query/QueryHooks";
-import { queryClient } from "../main";
 import { Conversation, SendMessageRequest } from "../Query/types";
 import ContextMenu from "./ContextMemu";
 import ForwardModalComponent from "./ForwardModal";
-import { useAudioRecorder } from "use-audio-recorder";
 import { ScreenRecorder } from "./ScreenRecorder";
 
 interface ChatComponentProps {
@@ -24,11 +23,6 @@ interface ChatComponentProps {
 export const ChatComponent: React.FC<ChatComponentProps> = ({
   conversation,
 }) => {
-  // If no conversation exists, show a placeholder message.
-  if (!conversation) {
-    return <p>No conversations yet. Start a new chat!</p>;
-  }
-
   const conversationId = conversation.id;
   const {
     data: messages = [],
@@ -135,12 +129,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       console.error("Failed to upload audio:", error);
     }
   };
-
-  useEffect(() => {
-    (recorder as any).onRecordingStop = () => {
-      setIsRecording(false);
-    };
-  }, [recorder]);
 
   const handleRecorderClick = () => {
     if (isRecording) {

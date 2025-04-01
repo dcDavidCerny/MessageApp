@@ -4,14 +4,14 @@ import { ChatComponent } from "../Components/Chat";
 import { ConversationsColumnComponent } from "../Components/ConversationsColumn";
 import { ErrorComponent } from "../Components/Error";
 import { Loading } from "../Components/Loading";
+import { ResizeComponentWrapper } from "../Components/ResizeComponentWrapper";
+import { TemporaryComponent } from "../Components/TemporaryColumnForMoreHooks";
 import { queryClient } from "../main";
 import {
   useGetCurrentUser,
   useGetRecentConversations,
   useUpdateCurrentUser,
 } from "../Query/QueryHooks";
-import { TemporaryComponent } from "../Components/TemporaryColumnForMoreHooks";
-import { ResizeComponentWrapper } from "../Components/ResizeComponentWrapper";
 
 export const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<
@@ -56,6 +56,9 @@ export const ChatPage = () => {
   if (isUserLoadingPending || !user || isPending || !conversations) {
     return <Loading />;
   }
+  const selectedConversation =
+    conversations.find((c) => c.id === selectedConversationId) ||
+    conversations[0];
   return (
     <>
       {updateUserPending && <Loading animation="pulse" />}
@@ -71,12 +74,11 @@ export const ChatPage = () => {
             selectedConversationId={selectedConversationId || ""}
             setSelectedConversationId={setSelectedConversationId}
           />
-          <ChatComponent
-            conversation={
-              conversations.find((c) => c.id === selectedConversationId) ||
-              conversations[0]
-            }
-          />
+          {selectedConversation ? (
+            <ChatComponent conversation={selectedConversation} />
+          ) : (
+            <p>No conversations yet. Start a new chat!</p>
+          )}
         </ResizeComponentWrapper>
       </ChatPageWrapper>
     </>

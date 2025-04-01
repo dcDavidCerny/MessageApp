@@ -23,22 +23,15 @@ import {
   UpdateConversationRequest,
   UpdatesCheckResponse,
   UpdateUserRequest,
-  User,
-  VerifyResponse,
   // New types for UploadResponse, created in types.ts
   UploadResponse,
+  User,
+  VerifyResponse,
 } from "./types";
 
-export const apiHost = `https://${location.hostname}/api`;
-
-
-
-
-
-
-
-
-
+export const apiHost = location.hostname.includes("localhost")
+  ? "http://localhost:3000"
+  : `https://${location.hostname}/api`;
 
 export const useUploadFile = (
   options?: UseMutationOptions<UploadResponse, Error, File>
@@ -62,22 +55,6 @@ export const useUploadFile = (
     ...options,
   });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // end of new code
 
@@ -110,7 +87,7 @@ export const useApiQuery = <TData = unknown>(
         try {
           const errorJson = JSON.parse(errorText);
           throw new Error(
-          `API fetch error - method: GET, route: ${route}, status: ${response.status}, text: ${errorJson.message}`
+            `API fetch error - method: GET, route: ${route}, status: ${response.status}, text: ${errorJson.message}`
           );
         } catch (e) {
           // if response is not json
@@ -221,7 +198,7 @@ export const useChangePassword = (
 
 export const useSearchUsers = (
   query: string,
-  options?: Partial< UseQueryOptions<User[], Error>>
+  options?: Partial<UseQueryOptions<User[], Error>>
 ) => {
   return useApiQuery<User[]>("/users/search", { query }, options);
 };
@@ -505,11 +482,19 @@ export const useGetMessages = (
 };
 
 export const useSendMessage = (
-  options?: UseMutationOptions<Message, Error, { conversationId: string; data: SendMessageRequest }>
+  options?: UseMutationOptions<
+    Message,
+    Error,
+    { conversationId: string; data: SendMessageRequest }
+  >
 ) => {
-  return useMutation<Message, Error, { conversationId: string; data: SendMessageRequest }>({
+  return useMutation<
+    Message,
+    Error,
+    { conversationId: string; data: SendMessageRequest }
+  >({
     mutationFn: async ({ conversationId, data }) => {
-      console.log("Sending message data:", data);  // Add this log to inspect the data
+      console.log("Sending message data:", data); // Add this log to inspect the data
 
       const route = `/messages/conversations/${conversationId}/messages`;
       const response = await fetch(`${apiHost}${route}`, {
