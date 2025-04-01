@@ -2,14 +2,18 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { queryClient } from "../main";
 import {
-    apiHost,
-    useDeleteMessage,
-    useGetCurrentUser,
+  apiHost,
+  useDeleteMessage,
+  useGetCurrentUser,
 } from "../Query/QueryHooks";
 import { Conversation, Message, SendMessageRequest } from "../Query/types";
 import ContextMenu, { ContextMenuItem } from "./ContextMemu";
 import { ForwardModalComponent } from "./ForwardModal";
 import { Loading } from "./Loading";
+import { ThreeDostVerticalIcon } from "./Icons/ThreeDostVerticalIcon";
+import { formatDate } from "./FormatTimeFunc";
+import { formatMessage } from "./FormatMessageFunc";
+import { AttachmentRenderer } from "./AttachmentRenderer";
 
 interface MessageProps {
   message: Message;
@@ -82,60 +86,18 @@ export const MessageComponent = ({ message, conversation }: MessageProps) => {
         >
           <div className="sender-name">{senderName}</div>
           <div className="message-text">{formatMessage(message.content)}</div>
-          {message.metadata?.attachments &&
-            message.metadata.attachments.map(
-              (attachment: {
-                url: string;
-                type: "image" | "video" | "audio" | "other";
-              }) => {
-                const url = apiHost + attachment.url;
-                return (
-                  <div key={url}>
-                    {attachment.type === "image" && (
-                      <img
-                        src={url}
-                        alt="Attachment"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "200px",
-                        }}
-                      />
-                    )}
-                    {attachment.type === "video" && (
-                      <video
-                        src={url}
-                        controls
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "200px",
-                        }}
-                      />
-                    )}
-                    {attachment.type === "audio" && (
-                      <audio src={url} controls style={{ maxWidth: "100%" }} />
-                    )}
-                    {attachment.type === "other" && (
-                      <a href={url} target="_blank" rel="noreferrer">
-                        {attachment.url}
-                      </a>
-                    )}
-                  </div>
-                );
-              }
-            )}
+
+          {message.metadata?.attachments && (
+            <AttachmentRenderer
+              attachments={message.metadata.attachments}
+              apiHost={apiHost}
+            />
+          )}
+
           <div className="timestamp">{formattedDate}</div>
           <div className="threeDotsIconDiv">
             <ContextMenu items={contextMenuItems} isOnClick>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                className="bi bi-three-dots-vertical"
-                viewBox="0 0 16 16"
-              >
-                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-              </svg>
+              <ThreeDostVerticalIcon />
             </ContextMenu>
           </div>
         </div>
@@ -210,50 +172,3 @@ const MessageWrapper = styled.div`
     }
   }
 `;
-
-const formatMessage = (message: string) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return message.split(urlRegex).map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="href-link"
-        >
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
-};
-
-const formatDate = (date: Date) => {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-
-  const isToday =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
-
-  const timeString = date.toLocaleTimeString(undefined, {
-    hour12: false,
-  });
-
-  let formattedTimestamp;
-  if (isToday) {
-    formattedTimestamp = timeString;
-  } else {
-    formattedTimestamp =
-      date.getFullYear() === currentYear
-        ? date.toLocaleDateString(undefined) + " - " + timeString
-        : date.toLocaleDateString(undefined, { year: "numeric" }) +
-          " - " +
-          timeString;
-  }
-  return formattedTimestamp;
-};

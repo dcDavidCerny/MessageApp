@@ -8,7 +8,8 @@
       "problemMatcher": [],
       "presentation": {
         "group": "watch",
-        "close": true
+        "close": true,
+        "reveal": "always"
       }
     },
     {
@@ -18,7 +19,8 @@
       "problemMatcher": [],
       "presentation": {
         "group": "watch",
-        "close": true
+        "close": true,
+        "reveal": "always"
       }
     },
     {
