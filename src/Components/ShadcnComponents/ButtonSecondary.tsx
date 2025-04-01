@@ -20,3 +20,5 @@ export const ButtonSecondary: React.FC<ButtonSecondaryProps> = ({
     </Button>
   );
 };
+
+// add a fucking dark class to the html / body
