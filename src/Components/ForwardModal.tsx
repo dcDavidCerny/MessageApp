@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from "react";
 import styled from "@emotion/styled";
+import React, { useMemo, useState } from "react";
 import {
-  useGetRecentConversations,
-  useGetFriends,
-  useSearchUsers,
   useCreateDirectConversation,
+  useGetFriends,
+  useGetRecentConversations,
+  useSearchUsers,
   useSendMessage,
 } from "../Query/QueryHooks";
 import {
@@ -122,7 +122,7 @@ interface ForwardModalProps {
   forwardMessage: SendMessageRequest | null;
 }
 
-const ForwardModal: React.FC<ForwardModalProps> = ({
+export const ForwardModalComponent: React.FC<ForwardModalProps> = ({
   onClose,
   currentUserId,
   forwardMessage,
@@ -244,5 +244,3 @@ const ForwardModal: React.FC<ForwardModalProps> = ({
     </ModalOverlay>
   );
 };
-
-export default ForwardModal;

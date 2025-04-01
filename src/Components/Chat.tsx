@@ -4,16 +4,13 @@ import { useAudioRecorder } from "use-audio-recorder";
 import { queryClient } from "../main";
 import {
   apiHost,
-  useDeleteMessage,
   useGetCurrentUser,
   useGetMessages,
-  useMarkConversationAsRead,
   useSendMessage,
-  useUploadFile,
+  useUploadFile
 } from "../Query/QueryHooks";
-import { Conversation, SendMessageRequest } from "../Query/types";
-import ContextMenu from "./ContextMemu";
-import ForwardModalComponent from "./ForwardModal";
+import { Conversation } from "../Query/types";
+import { MessageComponent } from "./Message";
 import { ScreenRecorder } from "./ScreenRecorder";
 
 interface ChatComponentProps {
@@ -34,16 +31,11 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   const currentUserId = currentUserData?.id;
 
   const [input, setInput] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [forwardMessage, setForwardMessage] =
-    useState<SendMessageRequest | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const currentUser = "You";
 
   const { mutate: sendMessageMutation } = useSendMessage();
-  const { mutate: deleteMessageMutation } = useDeleteMessage();
 
   // Destructure the file upload mutation hook.
   const {
@@ -140,46 +132,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     }
   };
 
-  const handleOpenForwardModal = (messageContent: SendMessageRequest) => {
-    setForwardMessage(messageContent);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteMessage = (messageId: string) => {
-    if (!messageId) return;
-    console.log("Attempting to delete message with id:", messageId);
-    deleteMessageMutation(
-      { messageId },
-      {
-        onError: (error) => console.error("Failed to delete message:", error),
-        onSuccess: () => queryClient.invalidateQueries(),
-      }
-    );
-  };
-
-  const markConversationAsReadMutation = useMarkConversationAsRead({
-    onSuccess: () => {
-      console.log("Conversation marked as read");
-    },
-    onError: (error) => {
-      console.error("Error marking conversation as read", error);
-    },
-  });
-
-  useEffect(() => {
-    if (messages.length) {
-      markConversationAsReadMutation.mutate({ conversationId });
-    }
-  }, [messages, conversationId]);
-
-  const unreadCount = messages.filter(
-    (msg) =>
-      msg.senderId !== currentUserId &&
-      (!msg.readBy || !msg.readBy.includes(currentUserId ?? ""))
-  ).length;
-
-  const lastMessage = messages.length ? messages[messages.length - 1] : null;
-
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -210,26 +162,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     }
   };
 
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const formatMessage = (message: string) => {
-    return message.split(urlRegex).map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="href-link"
-          >
-            {part}
-          </a>
-        );
-      }
-      return part;
-    });
-  };
-
   if (error) return <div>Error loading messages.</div>;
   if (isPending) return <div>Loading messages...</div>;
 
@@ -254,37 +186,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
             .slice(-1)[0];
 
           return [...messages].reverse().map((msg) => {
-            const sender = conversation.otherParticipants.find(
-              (user) => user.id === msg.senderId
-            );
-            const senderName = sender ? sender.displayName : currentUser;
-
-            const date = new Date(msg.createdAt);
-            const now = new Date();
-            const currentYear = now.getFullYear();
-
-            const isToday =
-              date.getDate() === now.getDate() &&
-              date.getMonth() === now.getMonth() &&
-              date.getFullYear() === now.getFullYear();
-
-            const timeString = date.toLocaleTimeString(undefined, {
-              hour12: false,
-            });
-
-            let formattedTimestamp;
-            if (isToday) {
-              formattedTimestamp = timeString;
-            } else {
-              formattedTimestamp =
-                date.getFullYear() === currentYear
-                  ? date.toLocaleDateString(undefined) + " - " + timeString
-                  : date.toLocaleDateString(undefined, { year: "numeric" }) +
-                    " - " +
-                    timeString;
-            }
-
-            const isCurrentUser = senderName === currentUser;
+            const isCurrentUser = msg.senderId === currentUserId;
 
             return (
               <div
@@ -294,192 +196,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                 }
                 style={{ position: "relative" }}
               >
-                {isCurrentUser ? (
-                  <ContextMenu
-                    items={[
-                      {
-                        text: "Delete",
-                        onClick: () => handleDeleteMessage(msg.id),
-                      },
-                      {
-                        text: "Forward",
-                        onClick: () => handleOpenForwardModal(msg),
-                      },
-                    ]}
-                  >
-                    <div
-                      className="message-bubble message-bubble-current-user"
-                      onClick={() => console.log("Clicked message")}
-                    >
-                      <div className="sender-name">{senderName}</div>
-                      <div className="message-text">
-                        {formatMessage(msg.content)}
-                      </div>
-                      {msg.metadata?.attachments &&
-                        msg.metadata.attachments.map(
-                          (attachment: {
-                            url: string;
-                            type: "image" | "video" | "audio" | "other";
-                          }) => {
-                            const url = apiHost + attachment.url;
-                            return (
-                              <div key={url}>
-                                {attachment.type === "image" && (
-                                  <img
-                                    src={url}
-                                    alt="Attachment"
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "200px",
-                                    }}
-                                  />
-                                )}
-                                {attachment.type === "video" && (
-                                  <video
-                                    src={url}
-                                    controls
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "200px",
-                                    }}
-                                  />
-                                )}
-                                {attachment.type === "audio" && (
-                                  <audio
-                                    src={url}
-                                    controls
-                                    style={{ maxWidth: "100%" }}
-                                  />
-                                )}
-                                {attachment.type === "other" && (
-                                  <a
-                                    href={url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {attachment.url}
-                                  </a>
-                                )}
-                              </div>
-                            );
-                          }
-                        )}
-                      <div className="timestamp">{formattedTimestamp}</div>
-                      <div className="threeDotsIconDiv">
-                        <ContextMenu
-                          items={[
-                            {
-                              text: "Delete",
-                              onClick: () => handleDeleteMessage(msg.id),
-                            },
-                            {
-                              text: "Forward",
-                              onClick: () => handleOpenForwardModal(msg),
-                            },
-                          ]}
-                          isOnClick
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            fill="currentColor"
-                            className="bi bi-three-dots-vertical"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-                          </svg>
-                        </ContextMenu>
-                      </div>
-                    </div>
-                  </ContextMenu>
-                ) : (
-                  <ContextMenu
-                    items={[
-                      {
-                        text: "Forward",
-                        onClick: () => handleOpenForwardModal(msg),
-                      },
-                    ]}
-                  >
-                    <div className="message-bubble">
-                      <div className="sender-name">{senderName}</div>
-                      <div className="message-text">{msg.content}</div>
-                      {msg.metadata?.attachments &&
-                        msg.metadata.attachments.map(
-                          (attachment: {
-                            url: string;
-                            type: "image" | "video" | "audio" | "other";
-                          }) => {
-                            const url = apiHost + attachment.url;
-                            return (
-                              <div key={url}>
-                                {attachment.type === "image" && (
-                                  <img
-                                    src={url}
-                                    alt="Attachment"
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "200px",
-                                    }}
-                                  />
-                                )}
-                                {attachment.type === "video" && (
-                                  <video
-                                    src={url}
-                                    controls
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "200px",
-                                    }}
-                                  />
-                                )}
-                                {attachment.type === "audio" && (
-                                  <audio
-                                    src={url}
-                                    controls
-                                    style={{ maxWidth: "100%" }}
-                                  />
-                                )}
-                                {attachment.type === "other" && (
-                                  <a
-                                    href={url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {attachment.url}
-                                  </a>
-                                )}
-                              </div>
-                            );
-                          }
-                        )}
-                      <div className="timestamp">{formattedTimestamp}</div>
-                      <div className="threeDotsIconDiv">
-                        <ContextMenu
-                          items={[
-                            {
-                              text: "Forward",
-                              onClick: () => handleOpenForwardModal(msg),
-                            },
-                          ]}
-                          isOnClick
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            fill="currentColor"
-                            className="bi bi-three-dots-vertical"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-                          </svg>
-                        </ContextMenu>
-                      </div>
-                    </div>
-                  </ContextMenu>
-                )}
+                <MessageComponent message={msg} conversation={conversation} />
               </div>
             );
           });
@@ -536,14 +253,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
           queryClient={queryClient}
         />
       </div>
-
-      {isModalOpen && (
-        <ForwardModalComponent
-          onClose={() => setIsModalOpen(false)}
-          currentUserId={currentUserData?.id || ""}
-          forwardMessage={forwardMessage}
-        />
-      )}
     </ChatComponentWrapper>
   );
 };
@@ -574,20 +283,6 @@ const ChatComponentWrapper = styled.div`
     justify-content: flex-start;
   }
 
-  .message-bubble {
-    width: fit-content;
-    align-self: flex-start;
-    background: #e5e5ea;
-    color: black;
-    padding: 10px;
-    border-radius: 12px;
-    margin: 5px 0;
-  }
-
-  .message-bubble-current-user {
-    background-color: #81d4fe;
-  }
-
   .messageWrapperCurrentUser {
     align-self: flex-end;
     max-width: 85%;
@@ -597,71 +292,6 @@ const ChatComponentWrapper = styled.div`
     max-width: 85%;
   }
 
-  .sender-name {
-    font-size: 12px;
-    font-weight: bold;
-  }
-
-  .message-text {
-    font-size: 16px;
-    word-break: break-all;
-
-    .href-link {
-      color: black;
-      font-weight: 500;
-      opacity: 0.9;
-      text-decoration: underline;
-      word-break: break-all;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-  .timestamp {
-    font-size: 10px;
-    text-align: right;
-    margin-top: 4px;
-    opacity: 0.6;
-  }
-
-  .message-bubble:hover .threeDotsIconDiv svg {
-    transition: opacity 0.33s cubic-bezier(1, 0.03, 1, -0.17);
-    opacity: 1;
-  }
-
-  .threeDotsIconDiv {
-    position: absolute;
-    right: 6px;
-    top: 13px;
-    cursor: pointer;
-    svg {
-      opacity: 0;
-    }
-  }
-
-  .deleteTooltip {
-    position: absolute;
-    left: 75%;
-    transform: translateX(-50%);
-    color: #fff;
-    border-radius: 4px;
-    font-size: 12px;
-    z-index: 10;
-    width: fit-content;
-    border-radius: 3px;
-  }
-
-  .deleteTooltip button {
-    margin-left: 4px;
-    background: #555;
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    cursor: pointer;
-    font-size: 12px;
-    width: 100%;
-  }
   .chat-input-container {
     display: flex;
     padding: 10px;
