@@ -1,21 +1,26 @@
 import { Button } from "../ui/button";
 import { ReactNode } from "react";
 
-interface ButtonSecondaryProps {
+interface ButtonOutlineIconProps {
   text?: string;
   className?: string;
   onClick?: () => void;
   children?: ReactNode;
 }
 
-export const ButtonSecondary: React.FC<ButtonSecondaryProps> = ({
+export const ButtonOutlineIcon: React.FC<ButtonOutlineIconProps> = ({
   text,
   className,
   onClick,
   children,
 }) => {
   return (
-    <Button variant="secondary" className={className} onClick={onClick}>
+    <Button
+      variant="secondary"
+      size="icon"
+      className={className}
+      onClick={onClick}
+    >
       {text || children}
     </Button>
   );

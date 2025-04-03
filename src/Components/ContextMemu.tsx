@@ -16,11 +16,13 @@ export interface ContextMenuProps {
   items: ContextMenuItem[];
   children: ReactNode;
   isOnClick?: boolean;
+  fullWidth?: boolean;
 }
 
-const Container = styled.div`
+const Container = styled.div<{ fullWidth?: boolean }>`
   display: inline-block;
   position: relative;
+  width: ${(props) => (props.fullWidth ? "100%" : "auto")};
 `;
 
 const Menu = styled.ul<{ x: number; y: number }>`
@@ -49,6 +51,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   items,
   children,
   isOnClick = false,
+  fullWidth = false,
 }) => {
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -80,6 +83,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
   return (
     <Container
+      fullWidth={fullWidth}
       {...(isOnClick
         ? { onClick: handleClickMenu }
         : { onContextMenu: handleContextMenu })}

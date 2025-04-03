@@ -118,7 +118,7 @@ const AddButton = styled.button`
 `;
 
 const CreateButton = styled.button`
-  background: #2374e1;
+  background: #1f1f1f;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -126,7 +126,7 @@ const CreateButton = styled.button`
   font-size: 16px;
   cursor: pointer;
   &:hover {
-    background: #1a5bbf;
+    background: #111111;
   }
 `;
 

@@ -1,11 +1,14 @@
 import { queryClient } from "../main";
 import { useSendMessage, useUploadFile, apiHost } from "../Query/QueryHooks";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAudioRecorder } from "use-audio-recorder";
 import { ScreenRecorder } from "./ScreenRecorder";
 import { Conversation } from "../Query/types";
 import styled from "@emotion/styled";
 import { ButtonSecondary } from "./ShadcnComponents/ButtonSecondary";
+import { ButtonOutlineIcon } from "./ShadcnComponents/ButtonOutlineIcon";
+import { TextAreaDefault } from "./ShadcnComponents/TextAreaDefault";
+import { SendMessageIcon } from "./Icons/SendMessageIcon";
 
 interface ChatInputContainerProps {
   conversation: Conversation;
@@ -17,7 +20,9 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
   const conversationId = conversation.id;
   const [input, setInput] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAudioInProgress, setIsAudioInProgress] = useState(false);
 
   const { mutate: sendMessageMutation } = useSendMessage();
 
@@ -71,7 +76,13 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
   };
 
   const recorder = useAudioRecorder();
-  console.log("recorder", recorder);
+
+  useEffect(() => {
+    if (recorder.blob) {
+      setRecordedBlob(recorder.blob);
+      setIsAudioInProgress(true);
+    }
+  }, [recorder.blob]);
 
   const uploadAudio = () => {
     if (!recorder.blob) return;
@@ -97,7 +108,13 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
                 },
               },
             },
-            { onSuccess: () => queryClient.invalidateQueries() }
+            {
+              onSuccess: () => {
+                queryClient.invalidateQueries();
+                setIsAudioInProgress(false);
+                setRecordedBlob(null);
+              },
+            }
           );
         });
     } catch (error) {
@@ -109,128 +126,135 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
     if (isRecording) {
       recorder.stopRecording();
       setIsRecording(false);
+      setIsAudioInProgress(true);
     } else {
       recorder.startRecording();
+      setIsAudioInProgress(true);
       setIsRecording(true);
     }
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(event.target.value);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") handleSendMessage();
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadFile(file);
-    }
-  };
-
-  // Handle pasted files (e.g. screenshots)
-  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
-      const file = e.clipboardData.files[0];
-      uploadFile(file);
-    }
+  const handleCancelRecording = () => {
+    setRecordedBlob(null);
+    setIsAudioInProgress(false);
+    setIsRecording(false);
   };
 
   const getFileType = (fileUrl: string) => {
     const ext = fileUrl.split(".").pop();
-    if (ext === "jpg" || ext === "jpeg" || ext === "png" || ext === "gif") {
-      return "image";
-    } else if (ext === "mp4" || ext === "mkv" || ext === "webm") {
-      return "video";
-    }
-    return "other";
+    return ["jpg", "jpeg", "png", "gif"].includes(ext || "")
+      ? "image"
+      : ["mp4", "mkv", "webm"].includes(ext || "")
+      ? "video"
+      : "other";
   };
 
   return (
-    <ChatInputContainerWrapper onPaste={handlePaste}>
+    <ChatInputContainerWrapper>
       <div className="chat-input-container">
-        <input
-          type="text"
+        <TextAreaDefault
           className="chat-input"
           placeholder="Type a message..."
           value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
         />
-        <button className="send-button" onClick={handleSendMessage}>
-          Send
-        </button>
-        <ButtonSecondary
-          className="upload-button"
-          onClick={() => fileInputRef.current?.click()}
-          text="Upload File!"
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          style={{ display: "none" }}
-          onChange={handleFileSelect}
-        />
-        {isLoading && <span className="upload-status">Uploading file...</span>}
-        {isError && (
-          <span className="upload-status error">
-            Upload failed: {uploadError?.message}
-          </span>
+        <ButtonOutlineIcon className="send-button" onClick={handleSendMessage}>
+          <SendMessageIcon />
+        </ButtonOutlineIcon>
+
+        {!recordedBlob && (
+          <ButtonSecondary
+            className="audio-button"
+            onClick={handleRecorderClick}
+          >
+            {isRecording ? "Stop Recording Audio" : "Start Recording Audio"}
+          </ButtonSecondary>
         )}
 
-        <button onClick={() => handleRecorderClick()}>
-          {isRecording ? "Stop Recording Audio" : "Start Recording Audio"}
-        </button>
-        {recorder.blob && (
+        {recordedBlob && (
           <>
-            <audio controls src={URL.createObjectURL(recorder.blob)} />
-            <button onClick={uploadAudio}>Audio Upload</button>
+            <audio controls src={URL.createObjectURL(recordedBlob)} />
+            <ButtonSecondary onClick={uploadAudio}>
+              Upload Audio
+            </ButtonSecondary>
+            <ButtonSecondary onClick={handleCancelRecording}>
+              Cancel
+            </ButtonSecondary>
           </>
         )}
-        <ScreenRecorder
-          conversationId={conversationId}
-          sendMessage={(conversationId, data, options) =>
-            sendMessageMutation({ conversationId, data }, options)
-          }
-          getFileType={getFileType}
-          queryClient={queryClient}
-        />
+
+        {!isAudioInProgress && (
+          <>
+            <ButtonSecondary
+              className="upload-button"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Upload File!
+            </ButtonSecondary>
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{ display: "none" }}
+              onChange={(e) =>
+                e.target.files?.[0] && uploadFile(e.target.files[0])
+              }
+            />
+            {isLoading && (
+              <span className="upload-status">Uploading file...</span>
+            )}
+            {isError && (
+              <span className="upload-status error">
+                Upload failed: {uploadError?.message}
+              </span>
+            )}
+            <ButtonSecondary className="screen-recorder-button">
+              <ScreenRecorder
+                conversationId={conversationId}
+                sendMessage={(conversationId, data, options) =>
+                  sendMessageMutation({ conversationId, data }, options)
+                }
+                getFileType={(fileUrl) => fileUrl.split(".").pop() || "other"}
+                queryClient={queryClient}
+              />
+            </ButtonSecondary>
+          </>
+        )}
       </div>
     </ChatInputContainerWrapper>
   );
 };
-
 const ChatInputContainerWrapper = styled.div`
   .chat-input-container {
     display: flex;
     padding: 10px;
-    background: white;
-    border-top: 1px solid #ccc;
+    background: #000000;
   }
 
   .chat-input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    font-size: 16px;
-    outline: none;
-    height: 30px;
+    resize: none;
+    max-height: 90px;
+    word-break: break-word;
+    min-width: 150px;
   }
 
   .send-button {
-    margin-left: 8px;
-    padding: 10px 15px;
-    background: #0078ff;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
+    margin-left: 5px;
+    height: 64px;
+  }
 
-    &:hover {
-      background: #005fcc;
-    }
+  .upload-button {
+    margin-left: 5px;
+    height: 64px;
+  }
+
+  .audio-button {
+    margin-left: 5px;
+    height: 64px;
+  }
+
+  .screen-recorder-button {
+    margin-left: 5px;
+    height: 64px;
   }
 `;

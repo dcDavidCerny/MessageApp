@@ -17,13 +17,10 @@ interface ScreenRecorderProps {
 }
 
 const RecorderContainer = styled.div`
-  margin-top: 1rem;
-  button {
-    margin-right: 0.5rem;
-    padding: 0.5rem 1rem;
-  }
   video {
-    margin-top: 1rem;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
     width: 100%;
     max-width: 500px;
   }

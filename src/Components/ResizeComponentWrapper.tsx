@@ -98,7 +98,7 @@ const Wrapper = styled.div`
 `;
 
 const Column = styled.div`
-  background-color: #f0f0f0;
+  background-color: #000000;
   padding: 10px;
   box-sizing: border-box;
   height: 100%;

@@ -1,13 +1,12 @@
-import styled from "@emotion/styled";
 import React, { useState } from "react";
-import { useGetRecentConversations } from "../Query/QueryHooks";
-import { ErrorComponent } from "./Error";
-import { Loading } from "./Loading";
+import styled from "@emotion/styled";
 import { ConversationComponent } from "./Conversation";
-import { ChatComponent } from "./Chat";
-import { ChatPage } from "../Pages/Chat";
-import { Conversation } from "../Query/types";
 import { CreateGroupConversation } from "./CreateGroupConversation";
+import { Conversation } from "../Query/types";
+import { DoorOpenIcon } from "./Icons/DoorOpenIcon";
+import { DoorClosedIcon } from "./Icons/DoorClosedIcon";
+import { ArrowLeftIcon } from "./Icons/ArrowLeftIcon";
+import { ArrowRightIcon } from "lucide-react";
 
 interface ConversationsColumnComponentProps {
   selectedConversationId: string;
@@ -20,48 +19,122 @@ export const ConversationsColumnComponent = ({
   setSelectedConversationId,
   conversations,
 }: ConversationsColumnComponentProps) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const handleConversationClick = (id: string) => {
     setSelectedConversationId(id);
   };
 
   return (
-    <ConversationsColumnComponentWrapper>
-      <div className="header">Conversations</div>
+    <ConversationsColumnComponentWrapper isSidebarOpen={isSidebarOpen}>
+      <ToggleSidebarButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        {isSidebarOpen ? (
+          <>
+            <ArrowLeftIcon />
+            <DoorOpenIcon />
+          </>
+        ) : (
+          <>
+            <DoorClosedIcon />
+            <ArrowRightIcon />
+          </>
+        )}
+      </ToggleSidebarButton>
+
+      {isSidebarOpen && <div className="header">Conversations</div>}
+
       <div className="conversations-list">
-        {conversations.map((conversation) => (
-          <ConversationComponent
-            key={conversation.id}
-            conversation={conversation}
-            onClick={() => {
-              handleConversationClick(conversation.id);
-            }}
-            selected={selectedConversationId === conversation.id}
-          />
-        ))}
-        <CreateGroupConversation />
+        {isSidebarOpen ? (
+          <>
+            {conversations.map((conversation) => (
+              <ConversationComponent
+                key={conversation.id}
+                conversation={conversation}
+                onClick={() => {
+                  handleConversationClick(conversation.id);
+                }}
+                selected={selectedConversationId === conversation.id}
+              />
+            ))}
+            <CreateGroupConversation />
+          </>
+        ) : (
+          <>
+            {conversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                onClick={() => handleConversationClick(conversation.id)}
+                className="conversation-avatar-list"
+              >
+                <img
+                  src={conversation.id || "/default-avatar.png"}
+                  alt={conversation.name}
+                  className="avatar-img"
+                />
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </ConversationsColumnComponentWrapper>
   );
 };
 
-const ConversationsColumnComponentWrapper = styled.div`
-  background-color: #f5f5f5;
-  border-right: 1px solid #ccc;
+const ConversationsColumnComponentWrapper = styled.div<{
+  isSidebarOpen: boolean;
+}>`
   display: flex;
   flex-direction: column;
+  width: ${({ isSidebarOpen }) => (isSidebarOpen ? "300px" : "60px")};
+  transition: width 0.3s ease-in-out;
+  border-right: 1px solid #303030;
 
   .header {
     padding: 16px;
     font-size: 20px;
     font-weight: bold;
-    background: #0078ff;
+    background: #000000;
     color: white;
     text-align: center;
+    overflow: hidden;
   }
 
   .conversations-list {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
+  }
+
+  .conversation-avatar-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+
+    .avatar-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+  }
+`;
+
+const ToggleSidebarButton = styled.button`
+  background-color: #303030;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: flex-end;
+
+  &:hover {
+    background-color: #555;
   }
 `;

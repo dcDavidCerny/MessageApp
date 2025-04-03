@@ -1,42 +1,81 @@
+import React, { useState } from "react";
 import styled from "@emotion/styled";
-import { Outlet, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ButtonSecondary } from "./ShadcnComponents/ButtonSecondary";
+import { DoorOpenIcon } from "./Icons/DoorOpenIcon";
+import { DoorClosedIcon } from "./Icons/DoorClosedIcon";
+import { ButtonOutlineIcon } from "./ShadcnComponents/ButtonOutlineIcon";
+import { MockIcon } from "./Icons/MockIcon";
+import { ArrowLeftIcon } from "./Icons/ArrowLeftIcon";
+import { ArrowRightIcon } from "./Icons/ArrowRightIcon";
 
 export const TemporaryComponent = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   return (
-    <TemporaryComponentWrapper>
-      <h2>Temporary Component</h2>
+    <TemporaryComponentWrapper isSidebarOpen={isSidebarOpen}>
+      <ToggleSidebarButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        {isSidebarOpen ? (
+          <>
+            <ArrowLeftIcon />
+            <DoorOpenIcon />
+          </>
+        ) : (
+          <>
+            <DoorClosedIcon />
+            <ArrowRightIcon />
+          </>
+        )}
+      </ToggleSidebarButton>
+
+      {isSidebarOpen && <h2>Temporary Column</h2>}
       <div className="btnsDiv">
         <Link to="/getFriends">
-          <button>My Friends</button>
+          {isSidebarOpen ? (
+            <ButtonSecondary className="btn">My Friends</ButtonSecondary>
+          ) : (
+            <ButtonOutlineIcon>
+              <MockIcon />
+            </ButtonOutlineIcon>
+          )}
         </Link>
 
         <Link to="/getFriendRequests">
-          <button>Friend Requests</button>
+          {isSidebarOpen ? (
+            <ButtonSecondary className="btn">Friend Requests</ButtonSecondary>
+          ) : (
+            <ButtonOutlineIcon>
+              <MockIcon />
+            </ButtonOutlineIcon>
+          )}
         </Link>
 
         <Link to="/searchUsers">
-          <button>Add Friend</button>
-        </Link>
-
-        <Link to="">
-          <button>EMPTY</button>
+          {isSidebarOpen ? (
+            <ButtonSecondary className="btn">Add Friend</ButtonSecondary>
+          ) : (
+            <ButtonOutlineIcon>
+              <MockIcon />
+            </ButtonOutlineIcon>
+          )}
         </Link>
       </div>
     </TemporaryComponentWrapper>
   );
 };
 
-const TemporaryComponentWrapper = styled.div`
-  width: 300px;
-  background-color: #f5f5f5;
-  border-right: 1px solid #ccc;
+const TemporaryComponentWrapper = styled.div<{ isSidebarOpen: boolean }>`
+  width: ${({ isSidebarOpen }) => (isSidebarOpen ? "300px" : "60px")};
+  border-right: 1px solid #303030;
   display: flex;
   flex-direction: column;
+  transition: width 0.3s ease-in-out;
 
   h2 {
     text-align: center;
     padding-bottom: 15px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #303030;
+    overflow: hidden;
   }
 
   .btnsDiv {
@@ -44,19 +83,29 @@ const TemporaryComponentWrapper = styled.div`
     flex-direction: column;
     gap: 10px;
     padding: 10px;
+  }
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.2s;
+  .btn {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+  }
+`;
 
-      &:hover {
-        background-color: #f0f0f0;
-      }
-    }
+const ToggleSidebarButton = styled.button`
+  background-color: #303030;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  display: flex;
+  justify-content: flex-end;
+
+  &:hover {
+    background-color: #555;
   }
 `;

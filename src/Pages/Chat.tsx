@@ -64,28 +64,29 @@ export const ChatPage = () => {
       {updateUserPending && <Loading animation="pulse" />}
       <ChatPageWrapper>
         <TemporaryComponent></TemporaryComponent>
-        <ResizeComponentWrapper
+        {/* <ResizeComponentWrapper
           initialConversationListWidth={200}
           conversationListMinWidth={170}
           conversationListMaxWidth={254}
-        >
-          <ConversationsColumnComponent
-            conversations={conversations}
-            selectedConversationId={selectedConversationId || ""}
-            setSelectedConversationId={setSelectedConversationId}
-          />
-          {selectedConversation ? (
-            <ChatComponent conversation={selectedConversation} />
-          ) : (
-            <p>No conversations yet. Start a new chat!</p>
-          )}
-        </ResizeComponentWrapper>
+        > */}
+        <ConversationsColumnComponent
+          conversations={conversations}
+          selectedConversationId={selectedConversationId || ""}
+          setSelectedConversationId={setSelectedConversationId}
+        />
+        {selectedConversation ? (
+          <ChatComponent conversation={selectedConversation} />
+        ) : (
+          <p>No conversations yet. Start a new chat!</p>
+        )}
+        {/* </ResizeComponentWrapper> */}
       </ChatPageWrapper>
     </>
   );
 };
 
 const ChatPageWrapper = styled.div`
+  background-color: #000000;
   display: flex;
   flex-direction: row;
   height: 100vh;

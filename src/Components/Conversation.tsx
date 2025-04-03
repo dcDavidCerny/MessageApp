@@ -10,7 +10,7 @@ const GROUP_IMG_SRC = () => {
       xmlns="http://www.w3.org/2000/svg"
       width="25"
       height="25"
-      fill="currentColor"
+      fill="white"
       className="bi bi-people-fill"
       viewBox="0 0 16 16"
     >
@@ -18,13 +18,13 @@ const GROUP_IMG_SRC = () => {
     </svg>
   );
 };
-export const DEFAULT_AVATAR_SRC = () => {
+const DEFAULT_AVATAR_SRC = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="25"
       height="25"
-      fill="black"
+      fill="white"
       className="bi bi-person-fill"
       viewBox="0 0 16 16"
     >
@@ -84,6 +84,7 @@ export const ConversationComponent = ({
     <ConversationComponentWrapper>
       {conversation.isGroup ? (
         <ContextMenu
+          fullWidth
           items={[
             {
               text: "Manage group",
@@ -114,6 +115,7 @@ export const ConversationComponent = ({
         </ContextMenu>
       ) : (
         <ContextMenu
+          fullWidth
           items={[
             {
               text: "Delete conversation",
@@ -159,18 +161,18 @@ const ConversationComponentWrapper = styled.div`
     display: flex;
     align-items: center;
     padding: 12px;
-    background: white;
+    background: #252525;
     border-radius: 8px;
     margin-bottom: 10px;
     cursor: pointer;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background: #e5e5ea;
+      background: #161616;
     }
 
     &.selected {
-      background: #d3e5ff;
+      background: #101010;
     }
 
     .profile-pic {
@@ -202,19 +204,6 @@ const ConversationComponentWrapper = styled.div`
       color: #aaa;
       text-align: right;
       margin-left: 10px;
-    }
-
-    .unread-count {
-      background-color: #0078ff;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-left: auto;
     }
   }
 `;
