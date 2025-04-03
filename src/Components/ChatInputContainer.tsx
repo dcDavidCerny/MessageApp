@@ -23,7 +23,8 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAudioInProgress, setIsAudioInProgress] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // Timer state
+  const [elapsedTime, setElapsedTime] = useState(0); // in seconds
+  const [isAudioRecordUploading, setIsAudioRecordUploading] = useState(false);
 
   const { mutate: sendMessageMutation } = useSendMessage();
 
@@ -85,41 +86,48 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
     }
   }, [recorder.blob]);
 
-  const uploadAudio = () => {
-    if (!recorder.blob) return;
+  const [isUploading, setIsUploading] = useState(false); // Prevent multiple uploads
+
+  const uploadAudio = async () => {
+    if (!recorder.blob || isUploading) return; // Prevent multiple uploads
+
+    setIsUploading(true); // Set flag to true when uploading starts
     const formData = new FormData();
     formData.append("file", recorder.blob, "audio.webm");
 
     try {
-      fetch(`${apiHost}/upload`, {
+      const response = await fetch(`${apiHost}/upload`, {
         method: "POST",
         body: formData,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Audio uploaded:", data.fileUrl);
+      });
 
-          sendMessageMutation(
-            {
-              conversationId,
-              data: {
-                content: "",
-                metadata: {
-                  attachments: [{ url: data.fileUrl, type: "audio" }],
-                },
-              },
+      const data = await response.json();
+      console.log("Audio uploaded:", data.fileUrl);
+
+      sendMessageMutation(
+        {
+          conversationId,
+          data: {
+            content: "",
+            metadata: {
+              attachments: [{ url: data.fileUrl, type: "audio" }],
             },
-            {
-              onSuccess: () => {
-                queryClient.invalidateQueries();
-                setIsAudioInProgress(false);
-                setRecordedBlob(null);
-              },
-            }
-          );
-        });
+          },
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+            setIsAudioInProgress(false);
+            setRecordedBlob(null);
+          },
+        }
+      );
     } catch (error) {
       console.error("Failed to upload audio:", error);
+    } finally {
+      // finally block to reset the uploading state
+      // very cool, happends either way, so we can set it to false in both cases
+      setIsUploading(false); // Reset flag once upload is complete
     }
   };
 
