@@ -1,6 +1,6 @@
+import { useState, useEffect, useRef } from "react";
 import { queryClient } from "../main";
 import { useSendMessage, useUploadFile, apiHost } from "../Query/QueryHooks";
-import { useState, useRef, useEffect } from "react";
 import { useAudioRecorder } from "use-audio-recorder";
 import { ScreenRecorder } from "./ScreenRecorder";
 import { Conversation } from "../Query/types";
@@ -23,6 +23,7 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAudioInProgress, setIsAudioInProgress] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0); // Timer state
 
   const { mutate: sendMessageMutation } = useSendMessage();
 
@@ -149,6 +150,23 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
       : "other";
   };
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isRecording) {
+      setElapsedTime(0);
+      interval = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (interval) clearInterval(interval);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
+
   return (
     <ChatInputContainerWrapper>
       <div className="chat-input-container">
@@ -159,9 +177,21 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
         />
-        <ButtonOutlineIcon className="send-button" onClick={handleSendMessage}>
-          <SendMessageIcon />
-        </ButtonOutlineIcon>
+
+        {!isAudioInProgress && (
+          <ButtonOutlineIcon
+            className="send-button"
+            onClick={handleSendMessage}
+          >
+            <SendMessageIcon />
+          </ButtonOutlineIcon>
+        )}
+
+        {/* ugly af, IK, but I am unsure, if some time limitation should come to the place.
+And if so, I think some circle which would be slowly filling up in clockTime movement.
+Top - Right - Bottom - Left - Top, which is also way padding and margin works :) */}
+
+        {isRecording && <p>Recording Time: {elapsedTime} sec</p>}
 
         {!recordedBlob && (
           <ButtonSecondary
@@ -174,12 +204,12 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
 
         {recordedBlob && (
           <>
+            <ButtonSecondary onClick={handleCancelRecording}>
+              Cancel
+            </ButtonSecondary>
             <audio controls src={URL.createObjectURL(recordedBlob)} />
             <ButtonSecondary onClick={uploadAudio}>
               Upload Audio
-            </ButtonSecondary>
-            <ButtonSecondary onClick={handleCancelRecording}>
-              Cancel
             </ButtonSecondary>
           </>
         )}
@@ -224,6 +254,7 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
     </ChatInputContainerWrapper>
   );
 };
+
 const ChatInputContainerWrapper = styled.div`
   .chat-input-container {
     display: flex;
@@ -236,10 +267,10 @@ const ChatInputContainerWrapper = styled.div`
     max-height: 90px;
     word-break: break-word;
     min-width: 150px;
+    margin-right: 5px;
   }
 
   .send-button {
-    margin-left: 5px;
     height: 64px;
   }
 
