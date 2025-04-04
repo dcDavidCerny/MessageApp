@@ -91,6 +91,7 @@ export const MessageComponent = ({ message, conversation }: MessageProps) => {
             <AttachmentRenderer
               attachments={message.metadata.attachments}
               apiHost={apiHost}
+              isCurrentUser={messageFromMe}
             />
           )}
 

@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
+import { AudioPlayerComponent } from "./AudioPlayer";
 
 interface Attachment {
   url: string;
@@ -9,11 +10,13 @@ interface Attachment {
 interface AttachmentRendererProps {
   attachments: Attachment[];
   apiHost: string;
+  isCurrentUser: boolean;
 }
 
 export const AttachmentRenderer: React.FC<AttachmentRendererProps> = ({
   attachments,
   apiHost,
+  isCurrentUser,
 }) => {
   return (
     <AttachmentContainer>
@@ -42,7 +45,8 @@ export const AttachmentRenderer: React.FC<AttachmentRendererProps> = ({
               />
             )}
             {attachment.type === "audio" && (
-              <audio src={url} controls style={{ maxWidth: "100%" }} />
+              // on false or true for testing purposeses
+              <AudioPlayerComponent url={url} isCurrentUser={isCurrentUser} />
             )}
             {attachment.type === "other" && (
               <a href={url} target="_blank" rel="noreferrer">
@@ -56,8 +60,4 @@ export const AttachmentRenderer: React.FC<AttachmentRendererProps> = ({
   );
 };
 
-const AttachmentContainer = styled.div`
-  audio {
-    padding: 5px;
-  }
-`;
+const AttachmentContainer = styled.div``;

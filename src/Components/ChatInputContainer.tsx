@@ -114,7 +114,6 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
         },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries();
             setIsAudioInProgress(false);
             setRecordedBlob(null);
             setIsUploading(false); // Reset flag once upload is complete
