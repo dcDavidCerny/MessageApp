@@ -24,8 +24,6 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAudioInProgress, setIsAudioInProgress] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0); // in seconds
-  const [isAudioRecordUploading, setIsAudioRecordUploading] = useState(false);
-
   const { mutate: sendMessageMutation } = useSendMessage();
 
   const {
@@ -119,15 +117,12 @@ export const ChatInputContainerComponent: React.FC<ChatInputContainerProps> = ({
             queryClient.invalidateQueries();
             setIsAudioInProgress(false);
             setRecordedBlob(null);
+            setIsUploading(false); // Reset flag once upload is complete
           },
         }
       );
     } catch (error) {
       console.error("Failed to upload audio:", error);
-    } finally {
-      // finally block to reset the uploading state
-      // very cool, happends either way, so we can set it to false in both cases
-      setIsUploading(false); // Reset flag once upload is complete
     }
   };
 

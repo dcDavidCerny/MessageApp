@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import React from "react";
 
 interface Attachment {
@@ -15,7 +16,7 @@ export const AttachmentRenderer: React.FC<AttachmentRendererProps> = ({
   apiHost,
 }) => {
   return (
-    <>
+    <AttachmentContainer>
       {attachments.map((attachment) => {
         const url = apiHost + attachment.url;
         return (
@@ -51,6 +52,12 @@ export const AttachmentRenderer: React.FC<AttachmentRendererProps> = ({
           </div>
         );
       })}
-    </>
+    </AttachmentContainer>
   );
 };
+
+const AttachmentContainer = styled.div`
+  audio {
+    padding: 5px;
+  }
+`;

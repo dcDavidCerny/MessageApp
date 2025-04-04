@@ -118,48 +118,87 @@ const MessageWrapper = styled.div`
   .message-bubble {
     width: fit-content;
     align-self: flex-start;
-    background: #e5e5ea;
-    color: black;
+    background: var(--secondary-foreground);
+    color: var(--secondary);
     padding: 10px;
     border-radius: 12px;
     margin: 5px 0;
+
+    .sender-name {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .message-text {
+      font-size: 16px;
+      word-break: break-all;
+
+      .href-link {
+        color: var(--secondary);
+        font-weight: 500;
+        opacity: 0.9;
+        text-decoration: underline;
+        word-break: break-all;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    .timestamp {
+      font-size: 10px;
+      text-align: right;
+      margin-top: 4px;
+      opacity: 0.6;
+      color: var(--secondary);
+    }
   }
 
   .message-bubble-current-user {
-    background-color: #81d4fe;
-  }
+    background-color: var(--secondary);
 
-  .sender-name {
-    font-size: 12px;
-    font-weight: bold;
-  }
+    .sender-name {
+      color: var(--secondary-foreground);
+    }
 
-  .message-text {
-    font-size: 16px;
-    word-break: break-all;
-
-    .href-link {
-      color: black;
-      font-weight: 500;
-      opacity: 0.9;
-      text-decoration: underline;
+    .message-text {
+      font-size: 16px;
       word-break: break-all;
+      color: var(--secondary-foreground);
 
-      &:hover {
-        opacity: 1;
+      .href-link {
+        color: var(--secondary-foreground);
+        font-weight: 500;
+        opacity: 0.9;
+        text-decoration: underline;
+        word-break: break-all;
+
+        &:hover {
+          opacity: 1;
+        }
       }
     }
-  }
-  .timestamp {
-    font-size: 10px;
-    text-align: right;
-    margin-top: 4px;
-    opacity: 0.6;
+
+    .timestamp {
+      font-size: 10px;
+      text-align: right;
+      margin-top: 4px;
+      opacity: 0.6;
+      color: var(--secondary-foreground);
+    }
   }
 
   .message-bubble:hover .threeDotsIconDiv svg {
     transition: opacity 0.33s cubic-bezier(1, 0.03, 1, -0.17);
     opacity: 1;
+    color: var(--secondary);
+  }
+
+  .message-bubble-current-user:hover .threeDotsIconDiv svg {
+    transition: opacity 0.33s cubic-bezier(1, 0.03, 1, -0.17);
+    opacity: 1;
+    color: var(--secondary-foreground);
   }
 
   .threeDotsIconDiv {

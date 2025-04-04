@@ -54,6 +54,8 @@ router.post(
   "/conversations/:id/messages",
   authenticate,
   async (req, res): Promise<void> => {
+    // delay 2s for testing purposes
+     await new Promise((resolve) => setTimeout(resolve, 2000));
     try {
       const conversationId = req.params.id;
       const { content, metadata } = req.body;
