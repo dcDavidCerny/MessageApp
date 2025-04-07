@@ -7,17 +7,22 @@ import { DoorOpenIcon } from "./Icons/DoorOpenIcon";
 import { DoorClosedIcon } from "./Icons/DoorClosedIcon";
 import { ArrowLeftIcon } from "./Icons/ArrowLeftIcon";
 import { ArrowRightIcon } from "lucide-react";
+import { ButtonSecondary } from "./ShadcnComponents/ButtonSecondary";
 
 interface ConversationsColumnComponentProps {
   selectedConversationId: string;
   setSelectedConversationId: (id: string) => void;
   conversations: Conversation[];
+  isChatOpen: boolean;
+  setIsChatOpen: (isOpen: boolean) => void;
 }
 
 export const ConversationsColumnComponent = ({
   selectedConversationId,
   setSelectedConversationId,
   conversations,
+  isChatOpen,
+  setIsChatOpen,
 }: ConversationsColumnComponentProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -57,6 +62,12 @@ export const ConversationsColumnComponent = ({
               />
             ))}
             <CreateGroupConversation />
+            <ButtonSecondary
+              className="chat-friends-switch"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+            >
+              {isChatOpen ? "FRIENDS" : "CHAT"}
+            </ButtonSecondary>
           </>
         ) : (
           <>
@@ -68,7 +79,7 @@ export const ConversationsColumnComponent = ({
               >
                 <img
                   src={conversation.id || "/default-avatar.png"}
-                  alt={conversation.name}
+                  // alt={conversation.name}
                   className="avatar-img"
                 />
               </div>
@@ -118,6 +129,12 @@ const ConversationsColumnComponentWrapper = styled.div<{
       border-radius: 50%;
       margin-bottom: 20px;
     }
+  }
+
+  .chat-friends-switch {
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
   }
 `;
 

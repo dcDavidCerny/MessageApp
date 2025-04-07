@@ -4,19 +4,20 @@ import { ChatComponent } from "../Components/Chat";
 import { ConversationsColumnComponent } from "../Components/ConversationsColumn";
 import { ErrorComponent } from "../Components/Error";
 import { Loading } from "../Components/Loading";
-import { ResizeComponentWrapper } from "../Components/ResizeComponentWrapper";
-import { TemporaryComponent } from "../Components/TemporaryColumnForMoreHooks";
 import { queryClient } from "../main";
 import {
   useGetCurrentUser,
   useGetRecentConversations,
   useUpdateCurrentUser,
 } from "../Query/QueryHooks";
+import { FriendsComponent } from "@/Components/Friends";
 
 export const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | null
   >(null);
+
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   const {
     data: user,
@@ -59,27 +60,27 @@ export const ChatPage = () => {
   const selectedConversation =
     conversations.find((c) => c.id === selectedConversationId) ||
     conversations[0];
+
   return (
     <>
       {updateUserPending && <Loading animation="pulse" />}
       <ChatPageWrapper>
-        <TemporaryComponent></TemporaryComponent>
-        {/* <ResizeComponentWrapper
-          initialConversationListWidth={200}
-          conversationListMinWidth={170}
-          conversationListMaxWidth={254}
-        > */}
         <ConversationsColumnComponent
           conversations={conversations}
           selectedConversationId={selectedConversationId || ""}
           setSelectedConversationId={setSelectedConversationId}
+          isChatOpen={isChatOpen}
+          setIsChatOpen={setIsChatOpen}
         />
-        {selectedConversation ? (
-          <ChatComponent conversation={selectedConversation} />
+        {isChatOpen ? (
+          selectedConversation ? (
+            <ChatComponent conversation={selectedConversation} />
+          ) : (
+            <p>No conversations yet. Start a new chat!</p>
+          )
         ) : (
-          <p>No conversations yet. Start a new chat!</p>
+          <FriendsComponent />
         )}
-        {/* </ResizeComponentWrapper> */}
       </ChatPageWrapper>
     </>
   );

@@ -20,6 +20,10 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     error,
   } = useGetMessages(conversationId);
 
+  const conversationName = conversation.isGroup
+    ? conversation.name
+    : conversation.otherParticipants[0]?.displayName || "Unknown Conversation";
+
   const { data: currentUserData } = useGetCurrentUser();
   const currentUserId = currentUserData?.id;
 
@@ -36,7 +40,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
 
   return (
     <ChatComponentWrapper>
-      <div className="chat-header">Chat</div>
+      <div className="chat-header">{conversationName}</div>
 
       <ScrollContainer>
         {[...messages].reverse().map((msg) => {
