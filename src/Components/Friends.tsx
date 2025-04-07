@@ -83,20 +83,22 @@ export const FriendsComponent: React.FC = () => {
                     // alt={friend.displayName}
                     className="avatar-img"
                   />
-                  <h3>{request.displayName}</h3>
-                  <p>{request.email}</p>
+                  <div className="name-email-column">
+                    <h3>{request.displayName}</h3>
+                    <p>{request.email}</p>
+                  </div>
                   <div className="requestButtons">
                     <ButtonSecondary
                       className="acceptBtn"
                       onClick={() => handleAccept(request.id)}
                     >
-                      Accept
+                      Y
                     </ButtonSecondary>
                     <ButtonSecondary
                       className="declineBtn"
                       onClick={() => handleDecline(request.id)}
                     >
-                      Decline
+                      N
                     </ButtonSecondary>
                   </div>
                 </div>
@@ -130,8 +132,10 @@ export const FriendsComponent: React.FC = () => {
                   // alt={friend.displayName}
                   className="avatar-img"
                 />
-                <h3>{user.displayName}</h3>
-                <p>{user.email}</p>
+                <div className="name-email-column">
+                  <h3>{user.displayName}</h3>
+                  <p>{user.email}</p>
+                </div>
                 <ButtonSecondary
                   className="sendRequestBtn"
                   onClick={() => handleSendFriendRequest(user.id)}
@@ -157,8 +161,10 @@ export const FriendsComponent: React.FC = () => {
                   // alt={friend.displayName}
                   className="avatar-img"
                 />
-                <h3>{friend.displayName}</h3>
-                <p>{friend.email}</p>
+                <div className="name-email-column">
+                  <h3>{friend.displayName}</h3>
+                  <p>{friend.email}</p>
+                </div>
                 <ButtonSecondary
                   className="unfriendBtn"
                   onClick={() => handleUnfriend(friend.id)}
@@ -206,6 +212,20 @@ const FriendsWrapper = styled.div`
     padding: 15px;
   }
 
+  .name-email-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .friends-list,
+  .requests-list,
+  .users-list {
+    display: flex;
+    flex-direction: wrap;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   .request-card,
   .user-card,
   .friend-card {
@@ -218,49 +238,12 @@ const FriendsWrapper = styled.div`
     justify-content: space-between;
     align-items: center;
     margin-top: 10px;
-    img {
-      width: 10%;
-      border-radius: 50%;
-    }
+  }
 
-    h3 {
-      width: 20%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    p {
-      width: 40%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    button {
-      width: 30%;
-    }
-
-    .requestButtons {
-      width: 30%;
-      display: flex;
-      gap: 5px;
-      button {
-        width: 50%;
-      }
-
-      .acceptBtn:hover {
-        border: 2px solid var(--chart-2);
-      }
-      .declineBtn:hover {
-        border: 2px solid var(--chart-5);
-      }
-    }
-
-    .unfriendBtn:hover {
-      border: 2px solid var(--chart-5);
-    }
-
-    .sendRequestBtn:hover {
-      border: 2px solid var(--chart-3);
-    }
+  .unfriendBtn,
+  .sendRequestBtn,
+  .acceptBtn,
+  .declineBtn {
+    margin-left: 10px;
   }
 `;

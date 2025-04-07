@@ -4,9 +4,6 @@ import "./App.css";
 import { ChatPage } from "./Pages/Chat";
 import { LoginComponent } from "./Pages/Login";
 import { RegisterComponent } from "./Pages/Register";
-import { SearchUsersPage } from "./Pages/SearchUsers";
-import { GetFriendRequestsPage } from "./Pages/GetFriendRequests";
-import { GetFriendsPage } from "./Pages/GetFriends";
 import { useCheckUpdates } from "./Query/QueryHooks";
 import { useEffect } from "react";
 import { queryClient } from "./main";
@@ -30,9 +27,6 @@ function App() {
         <Route path="/login" element={<LoginComponent />} />
         <Route path="/register" element={<RegisterComponent />} />
         <Route path="/chat" element={<ChatPage />} />
-        <Route path="/searchUsers" element={<SearchUsersPage />} />
-        <Route path="/getFriendRequests" element={<GetFriendRequestsPage />} />
-        <Route path="/getFriends" element={<GetFriendsPage />} />
         {/* path for unknown paths */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
