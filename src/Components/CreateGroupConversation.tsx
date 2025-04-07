@@ -118,6 +118,7 @@ const AddButton = styled.button`
 `;
 
 const CreateButton = styled.button`
+  width: 100%;
   background: #1f1f1f;
   color: white;
   border: none;
